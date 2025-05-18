@@ -96,12 +96,12 @@ export default function App() {
 
   return (
     <div className="app-container">
-      <h1 className="app-title">Spendly — Utility Bill Tracker</h1>
+      <h1 className="app-title">Spendly — Expense Tracker</h1>
 
       <div className="input-row">
         <input
           type="text"
-          placeholder="Utility Type"
+          placeholder="Expense Type"
           value={utilityType}
           onChange={(e) => setUtilityType(e.target.value)}
           className="input-utility-type"
@@ -115,7 +115,7 @@ export default function App() {
         />
         <input
           type="date"
-          placeholder="Bill Date"
+          placeholder="Expense Date"
           value={billDate}
           onChange={(e) => setBillDate(e.target.value)}
           className="input-bill-date"
@@ -140,7 +140,7 @@ export default function App() {
       </div>
 
       <ul className="bills-list">
-        {bills.length === 0 && <li className="no-bills">No bills found.</li>}
+        {bills.length === 0 && <li className="no-bills">No expenses found.</li>}
 
         {bills.map((bill) => (
           <li key={bill.id} className="bills-list-item">
