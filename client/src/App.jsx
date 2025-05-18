@@ -203,9 +203,9 @@ export default function App() {
             textAlign: "left",
           }}
         >
-          <div>Utility Type</div>
+          <div>Expense Type</div>
           <div>Amount</div>
-          <div>Bill Date</div>
+          <div>Expense Date</div>
           <div>Paid By</div>
           <div>Actions</div>
         </div>
