@@ -137,7 +137,7 @@ export default function App() {
           fontWeight: "700",
         }}
       >
-        Spendly — Utility Bill Tracker
+        Spendly — Expense Tracker
       </h1>
 
       <div
@@ -152,7 +152,7 @@ export default function App() {
       >
         <input
           type="text"
-          placeholder="Utility Type"
+          placeholder="Expense Type"
           value={utilityType}
           onChange={(e) => setUtilityType(e.target.value)}
           style={{ ...inputStyle, flex: "1 1 150px", minWidth: "140px" }}
@@ -166,7 +166,7 @@ export default function App() {
         />
         <input
           type="date"
-          placeholder="Bill Date"
+          placeholder="Expense Date"
           value={billDate}
           onChange={(e) => setBillDate(e.target.value)}
           style={{ ...inputStyle, flex: "1 1 140px", minWidth: "130px" }}
