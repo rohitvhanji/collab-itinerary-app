@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 
 export default function App() {
   const [bills, setBills] = useState([]);
@@ -6,31 +6,79 @@ export default function App() {
   const [amount, setAmount] = useState("");
   const [billDate, setBillDate] = useState("");
   const [paidBy, setPaidBy] = useState("");
+  const [editingId, setEditingId] = useState(null);
 
-  // Add a new bill entry
-  const addBill = () => {
+  // Add or update bill
+  const saveBill = () => {
     if (!utilityType || !amount || !billDate || !paidBy) {
       alert("Please fill all fields");
       return;
     }
-    const newBill = {
-      id: Date.now(),
-      utilityType,
-      amount: parseFloat(amount).toFixed(2),
-      billDate,
-      paidBy,
-    };
-    setBills([...bills, newBill]);
+
+    if (editingId) {
+      // Update existing bill
+      setBills((prev) =>
+        prev.map((bill) =>
+          bill.id === editingId
+            ? { id: editingId, utilityType, amount: parseFloat(amount).toFixed(2), billDate, paidBy }
+            : bill
+        )
+      );
+      setEditingId(null);
+    } else {
+      // Add new bill
+      const newBill = {
+        id: Date.now(),
+        utilityType,
+        amount: parseFloat(amount).toFixed(2),
+        billDate,
+        paidBy,
+      };
+      setBills((prev) => [...prev, newBill]);
+    }
+
+    // Reset input fields
     setUtilityType("");
     setAmount("");
     setBillDate("");
     setPaidBy("");
   };
 
-  // Delete a bill entry by id
-  const deleteBill = (id) => {
-    setBills(bills.filter((bill) => bill.id !== id));
+  // Edit a bill: populate fields
+  const editBill = (id) => {
+    const bill = bills.find((b) => b.id === id);
+    if (bill) {
+      setUtilityType(bill.utilityType);
+      setAmount(bill.amount);
+      setBillDate(bill.billDate);
+      setPaidBy(bill.paidBy);
+      setEditingId(id);
+    }
   };
+
+  // Delete a bill
+  const deleteBill = (id) => {
+    setBills((prev) => prev.filter((bill) => bill.id !== id));
+    // If deleting the bill currently being edited, reset edit mode
+    if (editingId === id) {
+      setEditingId(null);
+      setUtilityType("");
+      setAmount("");
+      setBillDate("");
+      setPaidBy("");
+    }
+  };
+
+  // Summary: total amount and count by utility type
+  const summary = bills.reduce(
+    (acc, bill) => {
+      acc.count++;
+      acc.total += parseFloat(bill.amount);
+      acc.byUtility[bill.utilityType] = (acc.byUtility[bill.utilityType] || 0) + parseFloat(bill.amount);
+      return acc;
+    },
+    { count: 0, total: 0, byUtility: {} }
+  );
 
   return (
     <div className="app-container">
@@ -67,8 +115,8 @@ export default function App() {
           value={paidBy}
           onChange={(e) => setPaidBy(e.target.value)}
         />
-        <button className="button-primary" onClick={addBill}>
-          Add Bill
+        <button className="button-primary" onClick={saveBill}>
+          {editingId ? "Update Bill" : "Add Bill"}
         </button>
       </div>
 
@@ -93,10 +141,10 @@ export default function App() {
               <div className="bill-column">{billDate}</div>
               <div className="bill-column">{paidBy}</div>
               <div className="bill-column-actions">
-                <button
-                  className="button-secondary"
-                  onClick={() => deleteBill(id)}
-                >
+                <button className="button-secondary" onClick={() => editBill(id)}>
+                  Edit
+                </button>
+                <button className="button-secondary" onClick={() => deleteBill(id)}>
                   Delete
                 </button>
               </div>
@@ -104,6 +152,23 @@ export default function App() {
           ))
         )}
       </div>
+
+      {/* Summary */}
+      {bills.length > 0 && (
+        <div className="summary-container">
+          <h2>Summary</h2>
+          <p>
+            Total Bills: <strong>{summary.count}</strong> | Total Amount: <strong>${summary.total.toFixed(2)}</strong>
+          </p>
+          <ul>
+            {Object.entries(summary.byUtility).map(([util, amt]) => (
+              <li key={util}>
+                {util}: ${amt.toFixed(2)}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }
