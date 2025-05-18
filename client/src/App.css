@@ -1,0 +1,132 @@
+/* Reset & base */
+body {
+  margin: 0;
+  background: #f5f7fa;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+}
+
+.app-container {
+  max-width: 480px;
+  margin: 3rem auto;
+  background: #fff;
+  padding: 2rem 2.5rem;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+}
+
+.app-title {
+  margin-bottom: 1.5rem;
+  font-weight: 700;
+  font-size: 1.8rem;
+  color: #2c3e50;
+  text-align: center;
+}
+
+.form-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  justify-content: center;
+}
+
+.input-field {
+  flex: 1 1 120px;
+  min-width: 120px;
+  padding: 0.45rem 0.75rem;
+  border: 1.8px solid #d1d9e6;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: #4a90e2;
+  box-shadow: 0 0 6px #a6c8ff;
+  background: #f9fbff;
+}
+
+.add-button {
+  background: #4a90e2;
+  color: white;
+  padding: 0.5rem 1.3rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  box-shadow: 0 4px 8px rgba(74, 144, 226, 0.4);
+  flex: 0 0 auto;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.add-button:hover:not(:disabled) {
+  background: #357ab8;
+  box-shadow: 0 6px 14px rgba(53, 122, 184, 0.6);
+}
+
+.add-button:active:not(:disabled) {
+  background: #2c5d86;
+  box-shadow: 0 2px 6px rgba(44, 93, 134, 0.8);
+}
+
+.add-button:disabled {
+  background: #a0b8d8;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.bills-list {
+  list-style: none;
+  padding-left: 0;
+  max-height: 280px;
+  overflow-y: auto;
+  border-top: 1px solid #e1e8f0;
+}
+
+.bill-item {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #e1e8f0;
+  font-size: 1rem;
+  color: #444;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.bill-date {
+  font-weight: 600;
+  color: #5d6d7e;
+  min-width: 100px;
+}
+
+.bill-utility {
+  font-weight: 700;
+  color: #34495e;
+  flex-grow: 1;
+  margin-left: 1rem;
+}
+
+.bill-amount {
+  font-weight: 700;
+  color: #27ae60;
+  min-width: 70px;
+  text-align: right;
+  margin-left: 1rem;
+}
+
+.bill-addedby {
+  font-size: 0.85rem;
+  color: #999;
+  margin-left: 1rem;
+  white-space: nowrap;
+}
+
+.empty-text {
+  padding: 1rem;
+  color: #888;
+  text-align: center;
+  font-style: italic;
+}
