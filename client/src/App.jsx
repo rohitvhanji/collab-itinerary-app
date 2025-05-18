@@ -7,13 +7,20 @@ function App() {
   const [utilityType, setUtilityType] = useState('');
   const [amount, setAmount] = useState('');
   const [billDate, setBillDate] = useState('');
+  const [loading, setLoading] = useState(false);
 
+  const backendUrl = 'https://collab-itinerary-app.onrender.com'; // replace with your backend URL
+
+  // Fetch bills for the selected home
   const fetchBills = async () => {
     try {
-      const res = await axios.get(`https://collab-itinerary-app.onrender.com/api/bills/${homeId}`);
+      setLoading(true);
+      const res = await axios.get(`${backendUrl}/api/bills/${homeId}`);
       setBills(res.data);
     } catch (error) {
-      console.error('Failed to fetch bills:', error);
+      console.error('Error fetching bills:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -22,56 +29,88 @@ function App() {
   }, [homeId]);
 
   const addBill = async () => {
-    if (!utilityType || !amount || !billDate) return;
+    if (!utilityType || !amount || !billDate) {
+      alert('Please fill all fields');
+      return;
+    }
+
     const newBill = {
       home_id: homeId,
       utility_type: utilityType,
       amount: parseFloat(amount),
       bill_date: billDate,
-      added_by: 'User'
+      added_by: 'User',
     };
+
     try {
-      await axios.post('https://collab-itinerary-app.onrender.com/api/bills', newBill);
-      // After adding, fetch all bills again
-      fetchBills();
+      setLoading(true);
+      await axios.post(`${backendUrl}/api/bills`, newBill);
+      await fetchBills();  // Refresh list after adding
+      // Clear form
       setUtilityType('');
       setAmount('');
       setBillDate('');
     } catch (error) {
-      console.error('Failed to add bill:', error);
+      console.error('Error adding bill:', error);
+      alert('Failed to add bill, try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="container">
-      <h1>Utility Bill Tracker</h1>
-      <div className="form">
+    <div className="container" style={{ maxWidth: 600, margin: 'auto', padding: 20, fontFamily: 'Arial, sans-serif' }}>
+      <h1 style={{ textAlign: 'center' }}>Utility Bill Tracker</h1>
+
+      <div className="form" style={{ marginBottom: 20, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
         <input
           value={utilityType}
           onChange={e => setUtilityType(e.target.value)}
-          placeholder="Utility Type"
+          placeholder="Utility Type (e.g. Electricity)"
+          style={{ flex: '1 1 150px', padding: 8 }}
         />
         <input
           value={amount}
           onChange={e => setAmount(e.target.value)}
           placeholder="Amount"
           type="number"
+          style={{ flex: '1 1 100px', padding: 8 }}
         />
         <input
           value={billDate}
           onChange={e => setBillDate(e.target.value)}
           placeholder="Bill Date"
           type="date"
+          style={{ flex: '1 1 150px', padding: 8 }}
         />
-        <button onClick={addBill}>Add Bill</button>
+        <button onClick={addBill} disabled={loading} style={{ padding: '8px 16px' }}>
+          {loading ? 'Processing...' : 'Add Bill'}
+        </button>
       </div>
-      <ul>
-        {bills.map((bill, index) => (
-          <li key={index}>
-            {bill.bill_date} - {bill.utility_type}: ₹{bill.amount} (by {bill.added_by})
-          </li>
-        ))}
-      </ul>
+
+      {loading && bills.length === 0 ? (
+        <p>Loading bills...</p>
+      ) : bills.length === 0 ? (
+        <p>No bills found for home: {homeId}</p>
+      ) : (
+        <ul style={{ listStyle: 'none', padding: 0 }}>
+          {bills.map(bill => (
+            <li
+              key={bill.id}
+              style={{
+                border: '1px solid #ddd',
+                borderRadius: 5,
+                marginBottom: 10,
+                padding: 10,
+                background: '#f9f9f9',
+              }}
+            >
+              <strong>{bill.utility_type}</strong> — ₹{bill.amount.toFixed(2)} on {bill.bill_date} <br />
+              <small>Added by: {bill.added_by}</small>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
