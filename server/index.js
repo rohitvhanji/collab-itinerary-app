@@ -4,20 +4,40 @@ const { createClient } = require('@supabase/supabase-js');
 require('dotenv').config();
 
 const app = express();
-app.use(cors());
+
+// Allowed origins for CORS
+const allowedOrigins = [
+  'https://collab-itinerary-app.vercel.app',
+  'http://localhost:3000', // add your local dev URL if needed
+];
+
+// CORS middleware with origin check
+app.use(cors({
+  origin: function(origin, callback){
+    // allow requests with no origin (like curl or Postman)
+    if(!origin) return callback(null, true);
+    if(allowedOrigins.indexOf(origin) === -1){
+      const msg = `The CORS policy for this site does not allow access from the specified Origin: ${origin}`;
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+
 app.use(express.json());
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
-// Get bills by homeId
+// Get bills for a home
 app.get('/api/bills/:homeId', async (req, res) => {
   const { homeId } = req.params;
   const { data, error } = await supabase
     .from('utility_bills')
     .select('*')
-    .eq('home_id', homeId)
-    .order('bill_date', { ascending: false }); // order latest first
-  if (error) return res.status(500).json({ error: error.message });
+    .eq('home_id', homeId);
+  if (error) return res.status(500).json({ error });
   res.json(data);
 });
 
@@ -26,34 +46,32 @@ app.post('/api/bills', async (req, res) => {
   const { home_id, utility_type, amount, bill_date, added_by } = req.body;
   const { data, error } = await supabase
     .from('utility_bills')
-    .insert([{ home_id, utility_type, amount, bill_date, added_by }])
-    .select();
-  if (error) return res.status(500).json({ error: error.message });
+    .insert([{ home_id, utility_type, amount, bill_date, added_by }]);
+  if (error) return res.status(500).json({ error });
   res.json(data);
 });
 
-// Update existing bill by id
+// Update a bill by id
 app.put('/api/bills/:id', async (req, res) => {
   const { id } = req.params;
   const { utility_type, amount, bill_date, added_by } = req.body;
   const { data, error } = await supabase
     .from('utility_bills')
     .update({ utility_type, amount, bill_date, added_by })
-    .eq('id', id)
-    .select();
-  if (error) return res.status(500).json({ error: error.message });
+    .eq('id', id);
+  if (error) return res.status(500).json({ error });
   res.json(data);
 });
 
-// Delete bill by id
+// Delete a bill by id
 app.delete('/api/bills/:id', async (req, res) => {
   const { id } = req.params;
   const { error } = await supabase
     .from('utility_bills')
     .delete()
     .eq('id', id);
-  if (error) return res.status(500).json({ error: error.message });
-  res.json({ message: 'Bill deleted' });
+  if (error) return res.status(500).json({ error });
+  res.json({ message: 'Deleted successfully' });
 });
 
 const PORT = process.env.PORT || 5000;
