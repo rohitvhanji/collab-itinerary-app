@@ -20,6 +20,7 @@ export default function App() {
   });
 
   async function fetchBills() {
+    console.log("Fetching bills");
     try {
       const res = await axios.get(
         `https://collab-itinerary-app.onrender.com/api/bills/${homeId}`
@@ -33,6 +34,7 @@ export default function App() {
   }
 
   useEffect(() => {
+    console.log("User effect ");
     fetchBills();
   }, [homeId]);
 
