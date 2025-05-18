@@ -11,10 +11,8 @@ export default function App() {
   const [paidBy, setPaidBy] = useState("");
   const [editingBillId, setEditingBillId] = useState(null);
 
-  // New state to hold selected month for analytics filter
-  // Format: "YYYY-MM" e.g. "2025-05"
+  // Selected month for analytics filter (YYYY-MM)
   const [selectedMonth, setSelectedMonth] = useState(() => {
-    // Initialize to current month in YYYY-MM format
     const now = new Date();
     return now.toISOString().slice(0, 7);
   });
@@ -27,7 +25,7 @@ export default function App() {
       setBills(res.data);
     } catch (error) {
       console.error("Error fetching bills:", error);
-      setBills([]); // reset on error
+      setBills([]);
     }
   }
 
@@ -102,25 +100,18 @@ export default function App() {
     resetInputs();
   };
 
-  // -- New Analytics Computations --
+  // Filter bills for selected month (YYYY-MM)
+  const filteredBills = bills.filter((bill) => bill.bill_date.startsWith(selectedMonth));
 
-  // Filter bills for the selected month (YYYY-MM)
-  const filteredBills = bills.filter((bill) => {
-    // bill.bill_date format assumed "YYYY-MM-DD"
-    return bill.bill_date.startsWith(selectedMonth);
-  });
-
-  // Compute total expense for selected month
+  // Analytics calculations
   const totalExpense = filteredBills.reduce((sum, bill) => sum + bill.amount, 0);
 
-  // Compute expense by person
   const expenseByPerson = {};
   filteredBills.forEach((bill) => {
     if (!expenseByPerson[bill.added_by]) expenseByPerson[bill.added_by] = 0;
     expenseByPerson[bill.added_by] += bill.amount;
   });
 
-  // Compute expense by category
   const expenseByCategory = {};
   filteredBills.forEach((bill) => {
     if (!expenseByCategory[bill.utility_type]) expenseByCategory[bill.utility_type] = 0;
@@ -150,108 +141,4 @@ export default function App() {
           <input
             type="date"
             placeholder="Expense Date"
-            value={billDate}
-            onChange={(e) => setBillDate(e.target.value)}
-            className="input-bill-date"
-          />
-          <input
-            type="text"
-            placeholder="Paid By"
-            value={paidBy}
-            onChange={(e) => setPaidBy(e.target.value)}
-            className="input-paid-by"
-          />
-
-          <button onClick={addOrUpdateBill} className="button-primary">
-            {editingBillId ? "Update Expense" : "Add Expense"}
-          </button>
-
-          {editingBillId && (
-            <button onClick={cancelEdit} className="button-secondary">
-              Cancel
-            </button>
-          )}
-        </div>
-        <ul className="bills-list">
-            <li className="bills-list-header">
-              <div className="bill-column">Type</div>
-              <div className="bill-column">Amount</div>
-              <div className="bill-column">Date</div>
-              <div className="bill-column">Paid By</div>
-              <div className="bill-column-actions">Actions</div>
-            </li>
-          {bills.length === 0 && <li className="no-bills">No expenses found.</li>}
-
-          {bills.map((bill) => (
-            <li key={bill.id} className="bills-list-item">
-              <div className="bills-list-item-info">
-                <div className="bill-column">{bill.utility_type}</div>
-                <div className="bill-column">₹{bill.amount.toFixed(2)}</div>
-                  <div className="bill-column">
-                    {new Date(bill.bill_date).toLocaleDateString("en-GB")}
-                  </div>
-                <div className="bill-column">{bill.added_by}</div>
-              </div>
-              <div className="bills-list-item-actions">
-                <button
-                  onClick={() => startEditBill(bill)}
-                  className="button-primary"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => deleteBill(bill.id)}
-                  className="button-secondary"
-                >
-                  Delete
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      {/* New Analytics Container */}
-      <div className="analytics-container">
-        <h2>Expense Summary</h2>
-
-        <label htmlFor="monthPicker">Select Month:</label>
-        <input
-          id="monthPicker"
-          type="month"
-          value={selectedMonth}
-          onChange={(e) => setSelectedMonth(e.target.value)}
-          className="month-picker"
-        />
-
-        <div className="analytics-summary">
-          <h3>Total Expense: ₹{totalExpense.toFixed(2)}</h3>
-
-          <div className="analytics-section">
-            <h4>Expense by Person:</h4>
-            <ul>
-              {Object.entries(expenseByPerson).length === 0 && <li>No data</li>}
-              {Object.entries(expenseByPerson).map(([person, amount]) => (
-                <li key={person}>
-                  {person}: ₹{amount.toFixed(2)}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="analytics-section">
-            <h4>Expense by Category:</h4>
-            <ul>
-              {Object.entries(expenseByCategory).length === 0 && <li>No data</li>}
-              {Object.entries(expenseByCategory).map(([category, amount]) => (
-                <li key={category}>
-                  {category}: ₹{amount.toFixed(2)}
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </div>
-    </>
-  );
-}
+            value={
