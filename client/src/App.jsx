@@ -179,8 +179,12 @@ export default function App() {
           {bills.map((bill) => (
             <li key={bill.id} className="bills-list-item">
               <div className="bills-list-item-info">
-                {bill.utility_type} - ₹{bill.amount.toFixed(2)} -{" "}
-                {new Date(bill.bill_date).toLocaleDateString()} - Paid by: {bill.added_by}
+                <div className="bill-column">{bill.utility_type}</div>
+                <div className="bill-column">₹{bill.amount.toFixed(2)}</div>
+                  <div className="bill-column">
+                    {new Date(bill.bill_date).toLocaleDateString("en-GB")}
+                  </div>
+                <div className="bill-column">{bill.added_by}</div>
               </div>
               <div className="bills-list-item-actions">
                 <button
