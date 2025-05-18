@@ -89,41 +89,6 @@ export default function App() {
     resetInputs();
   };
 
-  // Analytics calculations
-  const expenseByPerson = bills.reduce((acc, bill) => {
-    acc[bill.added_by] = (acc[bill.added_by] || 0) + bill.amount;
-    return acc;
-  }, {});
-
-  const expenseByType = bills.reduce((acc, bill) => {
-    acc[bill.utility_type] = (acc[bill.utility_type] || 0) + bill.amount;
-    return acc;
-  }, {});
-
-  const expenseByMonth = bills.reduce((acc, bill) => {
-    const date = new Date(bill.bill_date);
-    const month = date.toLocaleString("default", { month: "short", year: "numeric" });
-    acc[month] = (acc[month] || 0) + bill.amount;
-    return acc;
-  }, {});
-
-  // New analytics: current month expense by person
-  const now = new Date();
-  const currentMonth = now.getMonth();
-  const currentYear = now.getFullYear();
-
-  const expenseCurrentMonthByPerson = bills
-    .filter(bill => {
-      const d = new Date(bill.bill_date);
-      return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
-    })
-    .reduce((acc, bill) => {
-      acc[bill.added_by] = (acc[bill.added_by] || 0) + bill.amount;
-      return acc;
-    }, {});
-
-  const sortedCurrentMonthByPerson = Object.entries(expenseCurrentMonthByPerson).sort((a, b) => b[1] - a[1]);
-
   return (
     <div style={{ maxWidth: 960, margin: "2rem auto", padding: "1rem", fontFamily: "Arial, sans-serif" }}>
       <h1 style={{ color: "#0070d2", textAlign: "center" }}>Spendly — Expense Tracker</h1>
@@ -172,7 +137,7 @@ export default function App() {
       </div>
 
       {/* Bills Table */}
-      <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "2rem" }}>
+      <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <thead style={{ backgroundColor: "#e8f0fe" }}>
           <tr>
             <th style={{ border: "1px solid #ccc", padding: "0.5rem" }}>Type</th>
@@ -208,99 +173,6 @@ export default function App() {
           )}
         </tbody>
       </table>
-
-      {/* Analytics Section */}
-      <h2 style={{ color: "#0070d2" }}>Analytics</h2>
-
-      {/* Expense by Person */}
-      <div style={{ marginBottom: "1.5rem" }}>
-        <h3>Expense by Person</h3>
-        {Object.keys(expenseByPerson).length === 0 ? (
-          <p>No data</p>
-        ) : (
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
-            <tbody>
-              {Object.entries(expenseByPerson).map(([person, amt]) => (
-                <tr key={person}>
-                  <td style={{ borderBottom: "1px solid #ccc", padding: "0.3rem" }}>{person}</td>
-                  <td style={{ borderBottom: "1px solid #ccc", padding: "0.3rem", textAlign: "right" }}>
-                    ₹{amt.toFixed(2)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
-
-      {/* Expense by Type */}
-      <div style={{ marginBottom: "1.5rem" }}>
-        <h3>Expense by Type</h3>
-        {Object.keys(expenseByType).length === 0 ? (
-          <p>No data</p>
-        ) : (
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
-            <tbody>
-              {Object.entries(expenseByType).map(([type, amt]) => (
-                <tr key={type}>
-                  <td style={{ borderBottom: "1px solid #ccc", padding: "0.3rem" }}>{type}</td>
-                  <td style={{ borderBottom: "1px solid #ccc", padding: "0.3rem", textAlign: "right" }}>
-                    ₹{amt.toFixed(2)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
-
-      {/* Expense by Month */}
-      <div style={{ marginBottom: "1.5rem" }}>
-        <h3>Expense by Month</h3>
-        {Object.keys(expenseByMonth).length === 0 ? (
-          <p>No data</p>
-        ) : (
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
-            <tbody>
-              {Object.entries(expenseByMonth).map(([month, amt]) => (
-                <tr key={month}>
-                  <td style={{ borderBottom: "1px solid #ccc", padding: "0.3rem" }}>{month}</td>
-                  <td style={{ borderBottom: "1px solid #ccc", padding: "0.3rem", textAlign: "right" }}>
-                    ₹{amt.toFixed(2)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
-
-      {/* New: Current Month Expense by Person */}
-      <div>
-        <h3>Expense by Person — Current Month ({now.toLocaleString("default", { month: "long", year: "numeric" })})</h3>
-        {sortedCurrentMonthByPerson.length === 0 ? (
-          <p>No expenses recorded for this month.</p>
-        ) : (
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
-            <thead>
-              <tr style={{ backgroundColor: "#0070d2", color: "white" }}>
-                <th style={{ padding: "0.5rem", textAlign: "left" }}>Person</th>
-                <th style={{ padding: "0.5rem", textAlign: "right" }}>Amount (₹)</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sortedCurrentMonthByPerson.map(([person, amt]) => (
-                <tr key={person}>
-                  <td style={{ borderBottom: "1px solid #ccc", padding: "0.3rem" }}>{person}</td>
-                  <td style={{ borderBottom: "1px solid #ccc", padding: "0.3rem", textAlign: "right" }}>
-                    ₹{amt.toFixed(2)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
     </div>
   );
 }
