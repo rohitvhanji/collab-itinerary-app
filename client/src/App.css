@@ -76,6 +76,7 @@
   font-weight: 600;
   white-space: nowrap;
   transition: background-color 0.3s ease, color 0.3s ease;
+  margin-left: 0.5rem;
 }
 
 .button-secondary:hover {
@@ -133,4 +134,32 @@
   padding: 1rem;
   font-style: italic;
   color: #666;
+}
+
+/* Summary */
+.summary-container {
+  margin-top: 2rem;
+  background-color: #e6f2ff;
+  padding: 1.2rem 1.6rem;
+  border-radius: 10px;
+  color: #004a99;
+}
+
+.summary-container h2 {
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+}
+
+.summary-container p {
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+}
+
+.summary-container ul {
+  margin-left: 1.2rem;
+}
+
+.summary-container li {
+  list-style-type: disc;
+  margin-bottom: 0.3rem;
 }
