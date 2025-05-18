@@ -44,6 +44,7 @@ export default function App() {
   async function fetchBills() {
     try {
       const res = await axios.get(`https://collab-itinerary-app.onrender.com/api/bills/${homeId}`);
+      console.log("Fetched bills:", res.data);
       setBills(res.data);
     } catch (error) {
       console.error("Error fetching bills:", error);
@@ -59,8 +60,11 @@ export default function App() {
   };
 
   const addOrUpdateBill = async () => {
-    if (!utilityType || !amount || !billDate || !paidBy)
-      return alert("All fields are required");
+    console.log("Adding or updating bill:", { utilityType, amount, billDate, paidBy });
+    if (!utilityType || !amount || !billDate || !paidBy) {
+      alert("All fields are required");
+      return;
+    }
 
     try {
       if (editingBillId) {
@@ -86,6 +90,7 @@ export default function App() {
       resetInputs();
     } catch (error) {
       console.error("Error saving bill:", error);
+      alert("Failed to save bill. See console for details.");
     }
   };
 
@@ -97,13 +102,14 @@ export default function App() {
       await fetchBills();
     } catch (error) {
       console.error("Error deleting expense:", error);
+      alert("Failed to delete bill. See console for details.");
     }
   };
 
   const startEditBill = (bill) => {
     setEditingBillId(bill.id);
     setUtilityType(bill.utility_type);
-    setAmount(bill.amount);
+    setAmount(bill.amount.toString()); // Convert to string for input
     setBillDate(bill.bill_date);
     setPaidBy(bill.added_by);
   };
@@ -111,6 +117,8 @@ export default function App() {
   const cancelEdit = () => {
     resetInputs();
   };
+
+  console.log("Bills in state:", bills);
 
   // Analytics data
   const expenseByPerson = bills.reduce((acc, bill) => {
@@ -190,6 +198,11 @@ export default function App() {
           <div>Paid By</div>
           <div>Actions</div>
         </div>
+        {bills.length === 0 && (
+          <div style={{ padding: "1rem", textAlign: "center", color: "#777" }}>
+            No bills to show
+          </div>
+        )}
         {bills.map((bill) => (
           <div
             key={bill.id}
