@@ -93,14 +93,14 @@ export default function App() {
   };
 
   const deleteBill = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this bill?")) return;
+    if (!window.confirm("Are you sure you want to delete this expense?")) return;
 
     try {
       await axios.delete(`https://collab-itinerary-app.onrender.com/api/bills/${id}`);
       if (editingBillId === id) resetInputs();
       await fetchBills();
     } catch (error) {
-      console.error("Error deleting bill:", error);
+      console.error("Error deleting expense:", error);
     }
   };
 
