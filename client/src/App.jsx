@@ -203,7 +203,7 @@ export default function App() {
 
       {/* New Analytics Container */}
       <div className="analytics-container">
-        <h2>Expense Analytics</h2>
+        <h2>Expense Summary</h2>
 
         <label htmlFor="monthPicker">Select Month:</label>
         <input
