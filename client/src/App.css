@@ -95,23 +95,23 @@
 
 /* Each List Item */
 .bills-list-item-info {
-  flex: 1 1 60%;
-  min-width: 260px;
   display: flex;
-  flex-wrap: wrap;
+  flex: 1 1 auto;
   justify-content: space-between;
+  align-items: center;
   gap: 1rem;
+  min-width: 300px;
   font-size: 1rem;
   font-weight: 500;
   color: #333;
 }
 
 .bill-column {
-  flex: 1 1 120px;
-  min-width: 100px;
+  width: 130px;
   text-align: left;
   color: #1f1f1f;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  white-space: nowrap;
 }
 
 .bills-list-item {
