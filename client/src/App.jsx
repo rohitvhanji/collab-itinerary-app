@@ -10,7 +10,6 @@ function App() {
   const [paidBy, setPaidBy] = useState('');
   const [editingBill, setEditingBill] = useState(null);
 
-  // Fetch bills function with error handling
   const fetchBills = async () => {
     try {
       const res = await axios.get(`https://collab-itinerary-app.onrender.com/api/bills/${homeId}`);
@@ -24,13 +23,11 @@ function App() {
     fetchBills();
   }, [homeId]);
 
-  // Add or Update bill function
   const addOrUpdateBill = async () => {
     if (!utilityType || !amount || !billDate || !paidBy) return;
 
     try {
       if (editingBill) {
-        // Update existing bill
         await axios.put(`https://collab-itinerary-app.onrender.com/api/bills/${editingBill.id}`, {
           home_id: homeId,
           utility_type: utilityType,
@@ -41,7 +38,6 @@ function App() {
         });
         setEditingBill(null);
       } else {
-        // Add new bill
         await axios.post('https://collab-itinerary-app.onrender.com/api/bills', {
           home_id: homeId,
           utility_type: utilityType,
@@ -51,10 +47,7 @@ function App() {
           added_by: 'User',
         });
       }
-      // Refresh list after add/update
       await fetchBills();
-
-      // Reset input fields
       setUtilityType('');
       setAmount('');
       setBillDate('');
@@ -64,18 +57,15 @@ function App() {
     }
   };
 
-  // Delete bill function with error handling
   const deleteBill = async (id) => {
     try {
       await axios.delete(`https://collab-itinerary-app.onrender.com/api/bills/${id}`);
-      // Refresh list after delete
       await fetchBills();
     } catch (error) {
       console.error('Error deleting bill:', error);
     }
   };
 
-  // Start editing a bill: populate fields
   const startEdit = (bill) => {
     setEditingBill(bill);
     setUtilityType(bill.utility_type);
@@ -84,7 +74,6 @@ function App() {
     setPaidBy(bill.paid_by || '');
   };
 
-  // Cancel editing
   const cancelEdit = () => {
     setEditingBill(null);
     setUtilityType('');
@@ -97,7 +86,7 @@ function App() {
     <div className="container" style={{
       maxWidth: '900px',
       margin: '2rem auto',
-      backgroundColor: '#F4F8FB',  // Salesforce light blue background
+      backgroundColor: '#F4F8FB',  // Salesforce light blue background only here
       borderRadius: '10px',
       padding: '2rem',
       boxShadow: '0 0 15px rgba(0,0,0,0.1)'
@@ -116,40 +105,39 @@ function App() {
           value={utilityType}
           onChange={e => setUtilityType(e.target.value)}
           placeholder="Utility Type"
-          style={{ flex: '1 1 150px', padding: '0.5rem' }}
+          style={{ width: '140px', padding: '0.4rem' }}
         />
         <input
           value={amount}
           onChange={e => setAmount(e.target.value)}
           placeholder="Amount"
           type="number"
-          style={{ flex: '1 1 100px', padding: '0.5rem' }}
+          style={{ width: '80px', padding: '0.4rem' }}
         />
         <input
           value={billDate}
           onChange={e => setBillDate(e.target.value)}
           placeholder="Bill Date"
           type="date"
-          style={{ flex: '1 1 150px', padding: '0.5rem' }}
+          style={{ width: '140px', padding: '0.4rem' }}
         />
         <input
           value={paidBy}
           onChange={e => setPaidBy(e.target.value)}
           placeholder="Paid By"
-          style={{ flex: '1 1 150px', padding: '0.5rem' }}
+          style={{ width: '140px', padding: '0.4rem' }}
         />
         <button
           onClick={addOrUpdateBill}
           style={{
             backgroundColor: '#27ae60',
             color: 'white',
-            padding: '0.6rem 1.2rem',
+            padding: '0.5rem 1rem',
             border: 'none',
             borderRadius: '5px',
             cursor: 'pointer',
-            flex: '0 0 auto',
-            alignSelf: 'center',
             minWidth: '100px',
+            alignSelf: 'center'
           }}
         >
           {editingBill ? 'Update Bill' : 'Add Bill'}
@@ -160,13 +148,12 @@ function App() {
             style={{
               backgroundColor: '#e74c3c',
               color: 'white',
-              padding: '0.6rem 1.2rem',
+              padding: '0.5rem 1rem',
               border: 'none',
               borderRadius: '5px',
               cursor: 'pointer',
-              flex: '0 0 auto',
-              alignSelf: 'center',
               minWidth: '100px',
+              alignSelf: 'center'
             }}
           >
             Cancel
