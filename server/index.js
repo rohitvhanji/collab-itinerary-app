@@ -9,21 +9,21 @@ app.use(express.json());
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
-app.get('/api/itinerary/:tripId', async (req, res) => {
-  const { tripId } = req.params;
+app.get('/api/bills/:homeId', async (req, res) => {
+  const { homeId } = req.params;
   const { data, error } = await supabase
-    .from('itinerary_items')
+    .from('utility_bills')
     .select('*')
-    .eq('trip_id', tripId);
+    .eq('home_id', homeId);
   if (error) return res.status(500).json({ error });
   res.json(data);
 });
 
-app.post('/api/itinerary', async (req, res) => {
-  const { trip_id, title, time, added_by } = req.body;
+app.post('/api/bills', async (req, res) => {
+  const { home_id, utility_type, amount, bill_date, added_by } = req.body;
   const { data, error } = await supabase
-    .from('itinerary_items')
-    .insert([{ trip_id, title, time, added_by }]);
+    .from('utility_bills')
+    .insert([{ home_id, utility_type, amount, bill_date, added_by }]);
   if (error) return res.status(500).json({ error });
   res.json(data);
 });
