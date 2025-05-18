@@ -1,7 +1,6 @@
-/* client/App.css */
-
 .app-container {
   max-width: 900px;
+  width: 100%;
   margin: 2rem auto;
   padding: 2rem;
   background-color: #f0f8ff; /* Salesforce light blue */
