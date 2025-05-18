@@ -93,57 +93,33 @@
   overflow-y: auto;
 }
 
-/* Header and Item Rows Layout */
-.bills-list-header,
-.bills-list-item {
+.bills-list-item,
+.bills-list-header {
   display: flex;
   align-items: center;
-  padding: 0.75rem 0.5rem;
-  border-bottom: 1px solid #dce7f1;
-  font-size: 1rem;
-  color: #1a1a1a;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #ddd;
 }
 
 .bills-list-header {
-  font-weight: 700;
+  font-weight: bold;
   background-color: #e6f2ff;
 }
 
-/* Columns styling */
 .bill-column {
+  flex: 1 1 150px;
+  min-width: 120px;
   padding: 0 8px;
   text-align: left;
   word-break: break-word;
 }
 
-/* Fixed widths for columns */
-.bills-list-header .bill-column:nth-child(1),
-.bills-list-item .bill-column:nth-child(1) {
-  width: 20%;
-}
-
-.bills-list-header .bill-column:nth-child(2),
-.bills-list-item .bill-column:nth-child(2) {
-  width: 20%;
-}
-
-.bills-list-header .bill-column:nth-child(3),
-.bills-list-item .bill-column:nth-child(3) {
-  width: 20%;
-}
-
-.bills-list-header .bill-column:nth-child(4),
-.bills-list-item .bill-column:nth-child(4) {
-  width: 20%;
-}
-
-/* Actions column */
-.bills-list-header .bill-column-actions,
-.bills-list-item .bill-column-actions {
-  width: 20%;
+.bill-column-actions {
+  flex: 1 1 180px;
+  min-width: 160px;
   display: flex;
-  justify-content: flex-end;
   gap: 0.5rem;
+  justify-content: flex-end;
 }
 
 /* Consistent Date Color */
@@ -152,10 +128,13 @@
   font-weight: 500;
 }
 
-/* Action Buttons inside items */
+/* Action Buttons */
 .bills-list-item-actions {
+  flex: 1 1 35%;
+  min-width: 200px;
   display: flex;
   gap: 0.5rem;
+  justify-content: flex-end;
   flex-wrap: wrap;
 }
 
@@ -182,7 +161,7 @@
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* Section Titles */
+/* Section Title */
 .analytics-summary h3 {
   margin-bottom: 15px;
   font-weight: 600;
@@ -195,7 +174,7 @@
   margin-bottom: 20px;
 }
 
-/* List Items in analytics */
+/* List Items */
 .analytics-section ul {
   list-style-type: none;
   padding-left: 0;
