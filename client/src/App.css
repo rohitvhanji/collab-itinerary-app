@@ -94,9 +94,22 @@
 }
 
 /* Each List Item */
+.bills-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.5rem 0.25rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #0070d2;
+  border-bottom: 2px solid #ccc;
+  margin-bottom: 0.5rem;
+  flex-wrap: nowrap;
+}
+
 .bills-list-item-info {
   display: flex;
-  flex: 1 1 auto;
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
@@ -104,15 +117,16 @@
   font-size: 1rem;
   font-weight: 500;
   color: #333;
+  flex: 1 1 auto;
+  flex-wrap: nowrap;
 }
 
 .bill-column {
   width: 130px;
   text-align: left;
-  color: #1f1f1f;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   white-space: nowrap;
 }
+
 
 .bills-list-item {
   display: flex;
@@ -125,17 +139,6 @@
   background-color: #ffffff;
   border-radius: 6px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
-}
-
-.bills-list-header {
-  display: flex;
-  justify-content: space-between;
-  padding: 0.5rem 0.25rem;
-  font-weight: 600;
-  font-size: 0.95rem;
-  color: #0070d2;
-  border-bottom: 2px solid #ccc;
-  margin-bottom: 0.5rem;
 }
 
 /* Consistent Date Color */
