@@ -1,6 +1,35 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 
+const inputStyle = {
+  padding: "0.5rem 0.75rem",
+  border: "1px solid #ccc",
+  borderRadius: "4px",
+  fontSize: "1rem",
+};
+
+const buttonStylePrimary = {
+  backgroundColor: "#0070d2", // Salesforce Blue
+  color: "white",
+  border: "none",
+  borderRadius: "4px",
+  padding: "0.5rem 1rem",
+  cursor: "pointer",
+  fontWeight: "600",
+  whiteSpace: "nowrap",
+};
+
+const buttonStyleSecondary = {
+  backgroundColor: "#e0e6ed",
+  color: "#333",
+  border: "none",
+  borderRadius: "4px",
+  padding: "0.5rem 1rem",
+  cursor: "pointer",
+  fontWeight: "600",
+  whiteSpace: "nowrap",
+};
+
 export default function App() {
   const [bills, setBills] = useState([]);
   const [homeId] = useState("home_001");
@@ -10,18 +39,20 @@ export default function App() {
   const [paidBy, setPaidBy] = useState("");
   const [editingBillId, setEditingBillId] = useState(null);
 
-  useEffect(() => {
-    fetchBills();
-  }, []);
-
   async function fetchBills() {
     try {
-      const res = await axios.get(`https://collab-itinerary-app.onrender.com/api/bills/${homeId}`);
+      const res = await axios.get(
+        `https://collab-itinerary-app.onrender.com/api/bills/${homeId}`
+      );
       setBills(res.data);
     } catch (error) {
       console.error("Error fetching bills:", error);
     }
   }
+
+  useEffect(() => {
+    fetchBills();
+  }, [homeId]);
 
   const resetInputs = () => {
     setUtilityType("");
@@ -32,10 +63,7 @@ export default function App() {
   };
 
   const addOrUpdateBill = async () => {
-    if (!utilityType || !amount || !billDate || !paidBy) {
-      alert("All fields are required");
-      return;
-    }
+    if (!utilityType || !amount || !billDate || !paidBy) return alert("All fields are required");
 
     try {
       if (editingBillId) {
@@ -49,7 +77,7 @@ export default function App() {
           }
         );
       } else {
-        await axios.post(`https://collab-itinerary-app.onrender.com/api/bills`, {
+        await axios.post("https://collab-itinerary-app.onrender.com/api/bills", {
           home_id: homeId,
           utility_type: utilityType,
           amount: parseFloat(amount),
@@ -60,27 +88,26 @@ export default function App() {
       await fetchBills();
       resetInputs();
     } catch (error) {
-      console.error("Error saving bill:", error);
-      alert("Failed to save bill. See console for details.");
+      console.error("Error adding/updating bill:", error);
     }
   };
 
   const deleteBill = async (id) => {
     if (!window.confirm("Are you sure you want to delete this expense?")) return;
+
     try {
       await axios.delete(`https://collab-itinerary-app.onrender.com/api/bills/${id}`);
       if (editingBillId === id) resetInputs();
       await fetchBills();
     } catch (error) {
       console.error("Error deleting expense:", error);
-      alert("Failed to delete bill. See console for details.");
     }
   };
 
   const startEditBill = (bill) => {
     setEditingBillId(bill.id);
     setUtilityType(bill.utility_type);
-    setAmount(bill.amount.toString());
+    setAmount(bill.amount);
     setBillDate(bill.bill_date);
     setPaidBy(bill.added_by);
   };
@@ -90,89 +117,145 @@ export default function App() {
   };
 
   return (
-    <div style={{ maxWidth: 960, margin: "2rem auto", padding: "1rem", fontFamily: "Arial, sans-serif" }}>
-      <h1 style={{ color: "#0070d2", textAlign: "center" }}>Spendly — Expense Tracker</h1>
+    <div
+      style={{
+        maxWidth: "900px",
+        margin: "2rem auto",
+        padding: "2rem",
+        backgroundColor: "#f0f8ff",
+        borderRadius: "12px",
+        boxShadow: "0 4px 10px rgb(0 0 0 / 0.1)",
+        minHeight: "600px",
+        fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+      }}
+    >
+      <h1
+        style={{
+          textAlign: "center",
+          color: "#0070d2",
+          marginBottom: "2rem",
+          fontWeight: "700",
+        }}
+      >
+        Spendly — Expense Tracker
+      </h1>
 
-      {/* Form */}
-      <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginBottom: "1.5rem" }}>
+      <div
+        style={{
+          display: "flex",
+          gap: "0.75rem",
+          marginBottom: "2rem",
+          alignItems: "center",
+          flexWrap: "wrap",
+          justifyContent: "center",
+        }}
+      >
         <input
+          type="text"
           placeholder="Expense Type"
           value={utilityType}
-          onChange={e => setUtilityType(e.target.value)}
-          style={{ padding: "0.5rem", flex: "1 1 150px" }}
+          onChange={(e) => setUtilityType(e.target.value)}
+          style={{ ...inputStyle, flex: "1 1 150px", minWidth: "140px" }}
         />
         <input
           type="number"
           placeholder="Amount"
           value={amount}
-          onChange={e => setAmount(e.target.value)}
-          style={{ padding: "0.5rem", width: "120px" }}
+          onChange={(e) => setAmount(e.target.value)}
+          style={{ ...inputStyle, flex: "1 1 100px", minWidth: "90px" }}
         />
         <input
           type="date"
+          placeholder="Expense Date"
           value={billDate}
-          onChange={e => setBillDate(e.target.value)}
-          style={{ padding: "0.5rem", width: "160px" }}
+          onChange={(e) => setBillDate(e.target.value)}
+          style={{ ...inputStyle, flex: "1 1 140px", minWidth: "130px" }}
         />
         <input
+          type="text"
           placeholder="Paid By"
           value={paidBy}
-          onChange={e => setPaidBy(e.target.value)}
-          style={{ padding: "0.5rem", flex: "1 1 150px" }}
+          onChange={(e) => setPaidBy(e.target.value)}
+          style={{ ...inputStyle, flex: "1 1 140px", minWidth: "130px" }}
         />
-        <button
-          onClick={addOrUpdateBill}
-          style={{ backgroundColor: "#0070d2", color: "white", padding: "0.5rem 1rem", border: "none", cursor: "pointer" }}
-        >
-          {editingBillId ? "Update" : "Add"} Bill
+
+        <button onClick={addOrUpdateBill} style={buttonStylePrimary}>
+          {editingBillId ? "Update Bill" : "Add Bill"}
         </button>
+
         {editingBillId && (
-          <button
-            onClick={cancelEdit}
-            style={{ backgroundColor: "#eee", padding: "0.5rem 1rem", border: "none", cursor: "pointer" }}
-          >
+          <button onClick={cancelEdit} style={buttonStyleSecondary}>
             Cancel
           </button>
         )}
       </div>
 
-      {/* Bills Table */}
-      <table style={{ width: "100%", borderCollapse: "collapse" }}>
-        <thead style={{ backgroundColor: "#e8f0fe" }}>
-          <tr>
-            <th style={{ border: "1px solid #ccc", padding: "0.5rem" }}>Type</th>
-            <th style={{ border: "1px solid #ccc", padding: "0.5rem" }}>Amount (₹)</th>
-            <th style={{ border: "1px solid #ccc", padding: "0.5rem" }}>Date</th>
-            <th style={{ border: "1px solid #ccc", padding: "0.5rem" }}>Paid By</th>
-            <th style={{ border: "1px solid #ccc", padding: "0.5rem" }}>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {bills.length === 0 ? (
-            <tr><td colSpan={5} style={{ textAlign: "center", padding: "1rem" }}>No bills to show</td></tr>
-          ) : (
-            bills.map(bill => (
-              <tr key={bill.id}>
-                <td style={{ border: "1px solid #ccc", padding: "0.5rem" }}>{bill.utility_type}</td>
-                <td style={{ border: "1px solid #ccc", padding: "0.5rem", textAlign: "right" }}>{bill.amount.toFixed(2)}</td>
-                <td style={{ border: "1px solid #ccc", padding: "0.5rem" }}>{new Date(bill.bill_date).toLocaleDateString()}</td>
-                <td style={{ border: "1px solid #ccc", padding: "0.5rem" }}>{bill.added_by}</td>
-                <td style={{ border: "1px solid #ccc", padding: "0.5rem", textAlign: "center" }}>
-                  <button
-                    onClick={() => startEditBill(bill)}
-                    style={{ marginRight: "0.5rem", cursor: "pointer" }}
-                  >
-                    Edit
-                  </button>
-                  <button onClick={() => deleteBill(bill.id)} style={{ cursor: "pointer" }}>
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+      <div style={{ overflowX: "auto" }}>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr 1fr 1fr 180px",
+            gap: "0.5rem",
+            padding: "0.5rem 0",
+            fontWeight: "bold",
+            borderBottom: "2px solid #ccc",
+            backgroundColor: "#f7f9fb",
+            textAlign: "left",
+          }}
+        >
+          <div>Expense Type</div>
+          <div>Amount</div>
+          <div>Expense Date</div>
+          <div>Paid By</div>
+          <div>Actions</div>
+        </div>
+
+        {bills.length === 0 && (
+          <div
+            style={{
+              textAlign: "center",
+              padding: "1rem",
+              color: "#666",
+              fontStyle: "italic",
+            }}
+          >
+            No bills found.
+          </div>
+        )}
+
+        {bills.map((bill) => (
+          <div
+            key={bill.id}
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr 1fr 1fr 180px",
+              gap: "0.5rem",
+              alignItems: "center",
+              padding: "0.5rem 0",
+              borderBottom: "1px solid #eee",
+            }}
+          >
+            <div>{bill.utility_type}</div>
+            <div>₹{bill.amount.toFixed(2)}</div>
+            <div>{new Date(bill.bill_date).toLocaleDateString()}</div>
+            <div>{bill.added_by}</div>
+            <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+              <button
+                onClick={() => startEditBill(bill)}
+                style={{ ...buttonStylePrimary, flex: "1 1 80px" }}
+              >
+                Edit
+              </button>
+              <button
+                onClick={() => deleteBill(bill.id)}
+                style={{ ...buttonStyleSecondary, flex: "1 1 80px" }}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
