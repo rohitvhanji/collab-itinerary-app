@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import './App.css';  // We'll create this for styling
+import './App.css';
 
 function App() {
   const [bills, setBills] = useState([]);
@@ -8,6 +8,7 @@ function App() {
   const [utilityType, setUtilityType] = useState('');
   const [amount, setAmount] = useState('');
   const [billDate, setBillDate] = useState('');
+  const [paidBy, setPaidBy] = useState('');
   const [loading, setLoading] = useState(false);
 
   const fetchBills = async () => {
@@ -27,21 +28,21 @@ function App() {
   }, [homeId]);
 
   const addBill = async () => {
-    if (!utilityType.trim() || !amount || !billDate) return;
+    if (!utilityType.trim() || !amount || !billDate || !paidBy.trim()) return;
     try {
       const newBill = {
         home_id: homeId,
         utility_type: utilityType.trim(),
         amount: parseFloat(amount),
         bill_date: billDate,
-        added_by: 'User',
+        added_by: paidBy.trim(),
       };
       await axios.post('https://collab-itinerary-app.onrender.com/api/bills', newBill);
-      // Fetch updated bills
       fetchBills();
       setUtilityType('');
       setAmount('');
       setBillDate('');
+      setPaidBy('');
     } catch (err) {
       console.error('Error adding bill:', err);
     }
@@ -72,6 +73,13 @@ function App() {
           onChange={(e) => setBillDate(e.target.value)}
           className="input-field"
         />
+        <input
+          type="text"
+          placeholder="Paid By"
+          value={paidBy}
+          onChange={(e) => setPaidBy(e.target.value)}
+          className="input-field"
+        />
         <button className="add-button" onClick={addBill} disabled={loading}>
           {loading ? 'Adding...' : 'Add Bill'}
         </button>
@@ -83,7 +91,8 @@ function App() {
           <li key={bill.id} className="bill-item">
             <span className="bill-date">{bill.bill_date}</span> —{' '}
             <span className="bill-utility">{bill.utility_type}</span>: ₹
-            <span className="bill-amount">{bill.amount.toFixed(2)}</span> <span className="bill-addedby">(by {bill.added_by})</span>
+            <span className="bill-amount">{bill.amount.toFixed(2)}</span>{' '}
+            <span className="bill-addedby">(paid by {bill.added_by})</span>
           </li>
         ))}
       </ul>
