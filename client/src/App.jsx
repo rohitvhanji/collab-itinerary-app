@@ -1,33 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-const inputStyle = {
-  padding: "0.5rem 0.75rem",
-  border: "1px solid #ccc",
-  borderRadius: "4px",
-  fontSize: "1rem",
-};
-
-const buttonStylePrimary = {
-  backgroundColor: "#0070d2",
-  color: "white",
-  border: "none",
-  borderRadius: "4px",
-  padding: "0.5rem 1rem",
-  cursor: "pointer",
-  fontWeight: "600",
-};
-
-const buttonStyleSecondary = {
-  backgroundColor: "#e0e6ed",
-  color: "#333",
-  border: "none",
-  borderRadius: "4px",
-  padding: "0.5rem 1rem",
-  cursor: "pointer",
-  fontWeight: "600",
-};
-
 export default function App() {
   const [bills, setBills] = useState([]);
   const [homeId] = useState("home_001");
@@ -116,7 +89,7 @@ export default function App() {
     resetInputs();
   };
 
-  // Analytics data
+  // Analytics calculations
   const expenseByPerson = bills.reduce((acc, bill) => {
     acc[bill.added_by] = (acc[bill.added_by] || 0) + bill.amount;
     return acc;
@@ -134,10 +107,10 @@ export default function App() {
     return acc;
   }, {});
 
-  // New: Expense by person for CURRENT MONTH sorted descending
-  const currentDate = new Date();
-  const currentMonth = currentDate.getMonth(); // 0-11
-  const currentYear = currentDate.getFullYear();
+  // New analytics: current month expense by person
+  const now = new Date();
+  const currentMonth = now.getMonth();
+  const currentYear = now.getFullYear();
 
   const expenseCurrentMonthByPerson = bills
     .filter(bill => {
@@ -149,203 +122,178 @@ export default function App() {
       return acc;
     }, {});
 
-  // Sort by descending amount
-  const sortedExpenseCurrentMonthByPerson = Object.entries(expenseCurrentMonthByPerson)
-    .sort(([, amtA], [, amtB]) => amtB - amtA);
+  const sortedCurrentMonthByPerson = Object.entries(expenseCurrentMonthByPerson).sort((a, b) => b[1] - a[1]);
 
   return (
-    <div style={{ maxWidth: "960px", margin: "2rem auto", padding: "2rem", background: "#f0f8ff", borderRadius: "12px" }}>
-      <h1 style={{ textAlign: "center", color: "#0070d2" }}>Spendly — Expense Tracker</h1>
+    <div style={{ maxWidth: 960, margin: "2rem auto", padding: "1rem", fontFamily: "Arial, sans-serif" }}>
+      <h1 style={{ color: "#0070d2", textAlign: "center" }}>Spendly — Expense Tracker</h1>
 
       {/* Form */}
-      <div style={{ display: "flex", gap: "0.75rem", marginBottom: "2rem", flexWrap: "wrap" }}>
+      <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginBottom: "1.5rem" }}>
         <input
-          type="text"
           placeholder="Expense Type"
           value={utilityType}
-          onChange={(e) => setUtilityType(e.target.value)}
-          style={inputStyle}
+          onChange={e => setUtilityType(e.target.value)}
+          style={{ padding: "0.5rem", flex: "1 1 150px" }}
         />
         <input
           type="number"
           placeholder="Amount"
           value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          style={inputStyle}
+          onChange={e => setAmount(e.target.value)}
+          style={{ padding: "0.5rem", width: "120px" }}
         />
         <input
           type="date"
           value={billDate}
-          onChange={(e) => setBillDate(e.target.value)}
-          style={inputStyle}
+          onChange={e => setBillDate(e.target.value)}
+          style={{ padding: "0.5rem", width: "160px" }}
         />
         <input
-          type="text"
           placeholder="Paid By"
           value={paidBy}
-          onChange={(e) => setPaidBy(e.target.value)}
-          style={inputStyle}
+          onChange={e => setPaidBy(e.target.value)}
+          style={{ padding: "0.5rem", flex: "1 1 150px" }}
         />
-        <button onClick={addOrUpdateBill} style={buttonStylePrimary}>
+        <button
+          onClick={addOrUpdateBill}
+          style={{ backgroundColor: "#0070d2", color: "white", padding: "0.5rem 1rem", border: "none", cursor: "pointer" }}
+        >
           {editingBillId ? "Update" : "Add"} Bill
         </button>
         {editingBillId && (
-          <button onClick={cancelEdit} style={buttonStyleSecondary}>
+          <button
+            onClick={cancelEdit}
+            style={{ backgroundColor: "#eee", padding: "0.5rem 1rem", border: "none", cursor: "pointer" }}
+          >
             Cancel
           </button>
         )}
       </div>
 
       {/* Bills Table */}
-      <div>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr 1fr 1fr 140px",
-            fontWeight: "bold",
-            padding: "0.5rem",
-            background: "#e8f0fe",
-          }}
-        >
-          <div>Type</div>
-          <div>Amount</div>
-          <div>Date</div>
-          <div>Paid By</div>
-          <div>Actions</div>
-        </div>
-        {bills.length === 0 && (
-          <div style={{ padding: "1rem", textAlign: "center", color: "#777" }}>
-            No bills to show
-          </div>
-        )}
-        {bills.map((bill) => (
-          <div
-            key={bill.id}
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr 1fr 1fr 140px",
-              padding: "0.5rem",
-              borderBottom: "1px solid #ccc",
-            }}
-          >
-            <div>{bill.utility_type}</div>
-            <div>₹{bill.amount.toFixed(2)}</div>
-            <div>{new Date(bill.bill_date).toLocaleDateString()}</div>
-            <div>{bill.added_by}</div>
-            <div style={{ display: "flex", gap: "0.5rem" }}>
-              <button onClick={() => startEditBill(bill)} style={buttonStylePrimary}>
-                Edit
-              </button>
-              <button onClick={() => deleteBill(bill.id)} style={buttonStyleSecondary}>
-                Delete
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
+      <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "2rem" }}>
+        <thead style={{ backgroundColor: "#e8f0fe" }}>
+          <tr>
+            <th style={{ border: "1px solid #ccc", padding: "0.5rem" }}>Type</th>
+            <th style={{ border: "1px solid #ccc", padding: "0.5rem" }}>Amount (₹)</th>
+            <th style={{ border: "1px solid #ccc", padding: "0.5rem" }}>Date</th>
+            <th style={{ border: "1px solid #ccc", padding: "0.5rem" }}>Paid By</th>
+            <th style={{ border: "1px solid #ccc", padding: "0.5rem" }}>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {bills.length === 0 ? (
+            <tr><td colSpan={5} style={{ textAlign: "center", padding: "1rem" }}>No bills to show</td></tr>
+          ) : (
+            bills.map(bill => (
+              <tr key={bill.id}>
+                <td style={{ border: "1px solid #ccc", padding: "0.5rem" }}>{bill.utility_type}</td>
+                <td style={{ border: "1px solid #ccc", padding: "0.5rem", textAlign: "right" }}>{bill.amount.toFixed(2)}</td>
+                <td style={{ border: "1px solid #ccc", padding: "0.5rem" }}>{new Date(bill.bill_date).toLocaleDateString()}</td>
+                <td style={{ border: "1px solid #ccc", padding: "0.5rem" }}>{bill.added_by}</td>
+                <td style={{ border: "1px solid #ccc", padding: "0.5rem", textAlign: "center" }}>
+                  <button
+                    onClick={() => startEditBill(bill)}
+                    style={{ marginRight: "0.5rem", cursor: "pointer" }}
+                  >
+                    Edit
+                  </button>
+                  <button onClick={() => deleteBill(bill.id)} style={{ cursor: "pointer" }}>
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
 
       {/* Analytics Section */}
-      <h2 style={{ marginTop: "3rem", color: "#0070d2" }}>Analytics</h2>
+      <h2 style={{ color: "#0070d2" }}>Analytics</h2>
 
-      <div
-        style={{
-          display: "flex",
-          gap: "2rem",
-          flexWrap: "wrap",
-          justifyContent: "space-between",
-        }}
-      >
-        {/* Expense by Person */}
-        <div style={{ flex: "1 1 300px", background: "white", padding: "1rem", borderRadius: "8px", boxShadow: "0 2px 6px rgba(0,0,0,0.1)" }}>
-          <h3>Expense by Person</h3>
-          {Object.keys(expenseByPerson).length === 0 ? (
-            <p>No data</p>
-          ) : (
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
-              <tbody>
-                {Object.entries(expenseByPerson).map(([person, amount]) => (
-                  <tr key={person}>
-                    <td style={{ borderBottom: "1px solid #eee", padding: "0.25rem 0" }}>{person}</td>
-                    <td style={{ borderBottom: "1px solid #eee", padding: "0.25rem 0", textAlign: "right" }}>
-                      ₹{amount.toFixed(2)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
-
-        {/* Expense by Type */}
-        <div style={{ flex: "1 1 300px", background: "white", padding: "1rem", borderRadius: "8px", boxShadow: "0 2px 6px rgba(0,0,0,0.1)" }}>
-          <h3>Expense by Type</h3>
-          {Object.keys(expenseByType).length === 0 ? (
-            <p>No data</p>
-          ) : (
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
-              <tbody>
-                {Object.entries(expenseByType).map(([type, amount]) => (
-                  <tr key={type}>
-                    <td style={{ borderBottom: "1px solid #eee", padding: "0.25rem 0" }}>{type}</td>
-                    <td style={{ borderBottom: "1px solid #eee", padding: "0.25rem 0", textAlign: "right" }}>
-                      ₹{amount.toFixed(2)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
-
-        {/* Expense by Month */}
-        <div style={{ flex: "1 1 300px", background: "white", padding: "1rem", borderRadius: "8px", boxShadow: "0 2px 6px rgba(0,0,0,0.1)" }}>
-          <h3>Expense by Month</h3>
-          {Object.keys(expenseByMonth).length === 0 ? (
-            <p>No data</p>
-          ) : (
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
-              <tbody>
-                {Object.entries(expenseByMonth).map(([month, amount]) => (
-                  <tr key={month}>
-                    <td style={{ borderBottom: "1px solid #eee", padding: "0.25rem 0" }}>{month}</td>
-                    <td style={{ borderBottom: "1px solid #eee", padding: "0.25rem 0", textAlign: "right" }}>
-                      ₹{amount.toFixed(2)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
+      {/* Expense by Person */}
+      <div style={{ marginBottom: "1.5rem" }}>
+        <h3>Expense by Person</h3>
+        {Object.keys(expenseByPerson).length === 0 ? (
+          <p>No data</p>
+        ) : (
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <tbody>
+              {Object.entries(expenseByPerson).map(([person, amt]) => (
+                <tr key={person}>
+                  <td style={{ borderBottom: "1px solid #ccc", padding: "0.3rem" }}>{person}</td>
+                  <td style={{ borderBottom: "1px solid #ccc", padding: "0.3rem", textAlign: "right" }}>
+                    ₹{amt.toFixed(2)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
 
-      {/* NEW Analytics: Expense by Person for Current Month */}
-      <div
-        style={{
-          marginTop: "3rem",
-          background: "white",
-          padding: "1rem",
-          borderRadius: "8px",
-          boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
-        }}
-      >
-        <h3>Expense by Person — Current Month ({currentDate.toLocaleString("default", { month: "long", year: "numeric" })})</h3>
-        {sortedExpenseCurrentMonthByPerson.length === 0 ? (
-          <p>No expenses recorded for the current month.</p>
+      {/* Expense by Type */}
+      <div style={{ marginBottom: "1.5rem" }}>
+        <h3>Expense by Type</h3>
+        {Object.keys(expenseByType).length === 0 ? (
+          <p>No data</p>
+        ) : (
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <tbody>
+              {Object.entries(expenseByType).map(([type, amt]) => (
+                <tr key={type}>
+                  <td style={{ borderBottom: "1px solid #ccc", padding: "0.3rem" }}>{type}</td>
+                  <td style={{ borderBottom: "1px solid #ccc", padding: "0.3rem", textAlign: "right" }}>
+                    ₹{amt.toFixed(2)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      {/* Expense by Month */}
+      <div style={{ marginBottom: "1.5rem" }}>
+        <h3>Expense by Month</h3>
+        {Object.keys(expenseByMonth).length === 0 ? (
+          <p>No data</p>
+        ) : (
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <tbody>
+              {Object.entries(expenseByMonth).map(([month, amt]) => (
+                <tr key={month}>
+                  <td style={{ borderBottom: "1px solid #ccc", padding: "0.3rem" }}>{month}</td>
+                  <td style={{ borderBottom: "1px solid #ccc", padding: "0.3rem", textAlign: "right" }}>
+                    ₹{amt.toFixed(2)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      {/* New: Current Month Expense by Person */}
+      <div>
+        <h3>Expense by Person — Current Month ({now.toLocaleString("default", { month: "long", year: "numeric" })})</h3>
+        {sortedCurrentMonthByPerson.length === 0 ? (
+          <p>No expenses recorded for this month.</p>
         ) : (
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
-              <tr style={{ borderBottom: "2px solid #0070d2" }}>
-                <th style={{ textAlign: "left", padding: "0.5rem 0" }}>Person</th>
-                <th style={{ textAlign: "right", padding: "0.5rem 0" }}>Amount (₹)</th>
+              <tr style={{ backgroundColor: "#0070d2", color: "white" }}>
+                <th style={{ padding: "0.5rem", textAlign: "left" }}>Person</th>
+                <th style={{ padding: "0.5rem", textAlign: "right" }}>Amount (₹)</th>
               </tr>
             </thead>
             <tbody>
-              {sortedExpenseCurrentMonthByPerson.map(([person, amount]) => (
+              {sortedCurrentMonthByPerson.map(([person, amt]) => (
                 <tr key={person}>
-                  <td style={{ borderBottom: "1px solid #eee", padding: "0.25rem 0" }}>{person}</td>
-                  <td style={{ borderBottom: "1px solid #eee", padding: "0.25rem 0", textAlign: "right" }}>
-                    ₹{amount.toFixed(2)}
+                  <td style={{ borderBottom: "1px solid #ccc", padding: "0.3rem" }}>{person}</td>
+                  <td style={{ borderBottom: "1px solid #ccc", padding: "0.3rem", textAlign: "right" }}>
+                    ₹{amt.toFixed(2)}
                   </td>
                 </tr>
               ))}
