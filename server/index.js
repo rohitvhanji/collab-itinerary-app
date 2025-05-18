@@ -29,5 +29,32 @@ app.post('/api/bills', async (req, res) => {
   res.json(data);
 });
 
+
+// Delete bill by ID
+app.delete('/api/bills/:id', async (req, res) => {
+  const { id } = req.params;
+  const { error } = await supabase
+    .from('utility_bills')
+    .delete()
+    .eq('id', id);
+
+  if (error) return res.status(500).json({ error });
+  res.json({ message: 'Deleted successfully' });
+});
+
+// Update bill by ID
+app.put('/api/bills/:id', async (req, res) => {
+  const { id } = req.params;
+  const { utility_type, amount, bill_date, added_by } = req.body;
+
+  const { data, error } = await supabase
+    .from('utility_bills')
+    .update({ utility_type, amount, bill_date, added_by })
+    .eq('id', id);
+
+  if (error) return res.status(500).json({ error });
+  res.json(data);
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
