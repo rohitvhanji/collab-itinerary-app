@@ -1,5 +1,4 @@
-// client/App.jsx
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "./App.css";
 
@@ -20,6 +19,7 @@ export default function App() {
       setBills(res.data);
     } catch (error) {
       console.error("Error fetching bills:", error);
+      setBills([]); // reset on error
     }
   }
 
@@ -36,8 +36,10 @@ export default function App() {
   };
 
   const addOrUpdateBill = async () => {
-    if (!utilityType || !amount || !billDate || !paidBy)
-      return alert("All fields are required");
+    if (!utilityType || !amount || !billDate || !paidBy) {
+      alert("All fields are required");
+      return;
+    }
 
     try {
       if (editingBillId) {
@@ -63,6 +65,7 @@ export default function App() {
       resetInputs();
     } catch (error) {
       console.error("Error adding/updating bill:", error);
+      alert("Failed to add or update bill.");
     }
   };
 
@@ -75,6 +78,7 @@ export default function App() {
       await fetchBills();
     } catch (error) {
       console.error("Error deleting bill:", error);
+      alert("Failed to delete bill.");
     }
   };
 
@@ -108,8 +112,6 @@ export default function App() {
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
           className="input-amount"
-          min="0"
-          step="0.01"
         />
         <input
           type="date"
