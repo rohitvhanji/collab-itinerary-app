@@ -64,21 +64,21 @@ export default function App() {
       await fetchBills();
       resetInputs();
     } catch (error) {
-      console.error("Error adding/updating bill:", error);
-      alert("Failed to add or update bill.");
+      console.error("Error adding/updating expense:", error);
+      alert("Failed to add or update expense.");
     }
   };
 
   const deleteBill = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this bill?")) return;
+    if (!window.confirm("Are you sure you want to delete this expense?")) return;
 
     try {
       await axios.delete(`https://collab-itinerary-app.onrender.com/api/bills/${id}`);
       if (editingBillId === id) resetInputs();
       await fetchBills();
     } catch (error) {
-      console.error("Error deleting bill:", error);
-      alert("Failed to delete bill.");
+      console.error("Error deleting expense:", error);
+      alert("Failed to delete expense.");
     }
   };
 
@@ -129,7 +129,7 @@ export default function App() {
         />
 
         <button onClick={addOrUpdateBill} className="button-primary">
-          {editingBillId ? "Update Bill" : "Add Bill"}
+          {editingBillId ? "Update Expense" : "Add Expense"}
         </button>
 
         {editingBillId && (
