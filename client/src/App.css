@@ -58,7 +58,7 @@
   min-width: 130px;
 }
 
-/* Buttons */
+/* Primary Button */
 .button-primary {
   background-color: #0070d2;
   color: white;
@@ -69,13 +69,9 @@
   font-weight: 600;
   white-space: nowrap;
   flex: 0 0 auto;
-  transition: background-color 0.2s;
 }
 
-.button-primary:hover {
-  background-color: #005fb2;
-}
-
+/* Secondary Button */
 .button-secondary {
   background-color: #e0e6ed;
   color: #333;
@@ -86,67 +82,80 @@
   font-weight: 600;
   white-space: nowrap;
   flex: 0 0 auto;
-  transition: background-color 0.2s;
 }
 
-.button-secondary:hover {
-  background-color: #c9d2dc;
-}
-
-/* Bills List */
+/* List of Bills */
 .bills-list {
   list-style: none;
   padding: 0;
   margin: 0;
   max-height: 350px;
   overflow-y: auto;
-  border: 1px solid #d3e2f1;
-  border-radius: 8px;
 }
 
+/* Header and Item Rows Layout */
 .bills-list-header,
 .bills-list-item {
   display: flex;
   align-items: center;
   padding: 0.75rem 0.5rem;
   border-bottom: 1px solid #dce7f1;
-}
-
-.bills-list-header {
-  font-weight: bold;
-  background-color: #e6f2ff;
-}
-
-.bill-column {
-  flex: 1 1 150px;
-  min-width: 120px;
-  padding: 0 8px;
-  text-align: left;
-  word-break: break-word;
+  font-size: 1rem;
   color: #1a1a1a;
 }
 
-.bill-column-actions {
-  flex: 1 1 180px;
-  min-width: 160px;
-  display: flex;
-  gap: 0.5rem;
-  justify-content: flex-end;
+.bills-list-header {
+  font-weight: 700;
+  background-color: #e6f2ff;
 }
 
-/* Date Text */
+/* Columns styling */
+.bill-column {
+  padding: 0 8px;
+  text-align: left;
+  word-break: break-word;
+}
+
+/* Fixed widths for columns */
+.bills-list-header .bill-column:nth-child(1),
+.bills-list-item .bill-column:nth-child(1) {
+  width: 20%;
+}
+
+.bills-list-header .bill-column:nth-child(2),
+.bills-list-item .bill-column:nth-child(2) {
+  width: 20%;
+}
+
+.bills-list-header .bill-column:nth-child(3),
+.bills-list-item .bill-column:nth-child(3) {
+  width: 20%;
+}
+
+.bills-list-header .bill-column:nth-child(4),
+.bills-list-item .bill-column:nth-child(4) {
+  width: 20%;
+}
+
+/* Actions column */
+.bills-list-header .bill-column-actions,
+.bills-list-item .bill-column-actions {
+  width: 20%;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+/* Consistent Date Color */
 .bills-list-item-info span.date {
   color: #0070d2;
   font-weight: 500;
 }
 
-/* Actions Container */
+/* Action Buttons inside items */
 .bills-list-item-actions {
-  flex: 1 1 35%;
-  min-width: 200px;
   display: flex;
   gap: 0.5rem;
-  justify-content: flex-end;
   flex-wrap: wrap;
 }
 
@@ -160,46 +169,25 @@
   padding: 1rem;
   color: #666;
   font-style: italic;
-  font-size: 1rem;
 }
 
-/* Analytics Section */
+/* Analytics Container */
 .analytics-container {
   margin-top: 40px;
   padding: 20px;
-  background-color: #eef4fb;
+  background-color: #eef4fb; /* Light Salesforce-style analytics bg */
   border-radius: 8px;
   border: 1px solid #cfd8e3;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* Analytics Heading */
-.analytics-container h2 {
-  color: #0070d2;
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin-bottom: 1rem;
-  text-align: center;
-}
-
+/* Section Titles */
 .analytics-summary h3 {
-  margin: 1rem 0;
+  margin-bottom: 15px;
   font-weight: 600;
   font-size: 1.25rem;
   color: #1a1a1a;
-  text-align: center;
-}
-
-/* Month Picker */
-#monthPicker {
-  display: block;
-  margin: 0 auto 1.5rem auto;
-  padding: 0.4rem 0.75rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 0.95rem;
-  color: #0070d2;
 }
 
 /* Section Layout */
@@ -207,13 +195,7 @@
   margin-bottom: 20px;
 }
 
-.analytics-section h4 {
-  color: #333;
-  margin-bottom: 8px;
-  font-size: 1.1rem;
-}
-
-/* List Items */
+/* List Items in analytics */
 .analytics-section ul {
   list-style-type: none;
   padding-left: 0;
@@ -226,26 +208,12 @@
   color: #333;
 }
 
-/* Responsive Improvements */
-@media (max-width: 600px) {
-  .input-row {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .bills-list-header,
-  .bills-list-item {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .bill-column,
-  .bill-column-actions {
-    width: 100%;
-    padding: 4px 0;
-  }
-
-  .bills-list-item-actions {
-    justify-content: flex-start;
-  }
+/* Month Picker Styling */
+.month-picker {
+  margin-left: 10px;
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  color: #0070d2;
 }
