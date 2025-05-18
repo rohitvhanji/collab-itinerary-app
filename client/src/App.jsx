@@ -1,24 +1,5 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { Bar, Pie } from "react-chartjs-2";
-import {
-  Chart as ChartJS,
-  ArcElement,
-  BarElement,
-  CategoryScale,
-  LinearScale,
-  Tooltip,
-  Legend,
-} from "chart.js";
-
-ChartJS.register(
-  ArcElement,
-  BarElement,
-  CategoryScale,
-  LinearScale,
-  Tooltip,
-  Legend
-);
 
 const inputStyle = {
   padding: "0.5rem 0.75rem",
@@ -131,7 +112,7 @@ export default function App() {
     resetInputs();
   };
 
-  // Chart Data Generators
+  // Analytics data
   const expenseByPerson = bills.reduce((acc, bill) => {
     acc[bill.added_by] = (acc[bill.added_by] || 0) + bill.amount;
     return acc;
@@ -155,93 +136,143 @@ export default function App() {
 
       {/* Form */}
       <div style={{ display: "flex", gap: "0.75rem", marginBottom: "2rem", flexWrap: "wrap" }}>
-        <input type="text" placeholder="Expense Type" value={utilityType} onChange={(e) => setUtilityType(e.target.value)} style={inputStyle} />
-        <input type="number" placeholder="Amount" value={amount} onChange={(e) => setAmount(e.target.value)} style={inputStyle} />
-        <input type="date" value={billDate} onChange={(e) => setBillDate(e.target.value)} style={inputStyle} />
-        <input type="text" placeholder="Paid By" value={paidBy} onChange={(e) => setPaidBy(e.target.value)} style={inputStyle} />
-        <button onClick={addOrUpdateBill} style={buttonStylePrimary}>{editingBillId ? "Update" : "Add"} Bill</button>
-        {editingBillId && <button onClick={cancelEdit} style={buttonStyleSecondary}>Cancel</button>}
+        <input
+          type="text"
+          placeholder="Expense Type"
+          value={utilityType}
+          onChange={(e) => setUtilityType(e.target.value)}
+          style={inputStyle}
+        />
+        <input
+          type="number"
+          placeholder="Amount"
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+          style={inputStyle}
+        />
+        <input
+          type="date"
+          value={billDate}
+          onChange={(e) => setBillDate(e.target.value)}
+          style={inputStyle}
+        />
+        <input
+          type="text"
+          placeholder="Paid By"
+          value={paidBy}
+          onChange={(e) => setPaidBy(e.target.value)}
+          style={inputStyle}
+        />
+        <button onClick={addOrUpdateBill} style={buttonStylePrimary}>
+          {editingBillId ? "Update" : "Add"} Bill
+        </button>
+        {editingBillId && (
+          <button onClick={cancelEdit} style={buttonStyleSecondary}>
+            Cancel
+          </button>
+        )}
       </div>
 
-      {/* Table */}
+      {/* Bills Table */}
       <div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr 140px", fontWeight: "bold", padding: "0.5rem", background: "#e8f0fe" }}>
-          <div>Type</div><div>Amount</div><div>Date</div><div>Paid By</div><div>Actions</div>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr 1fr 1fr 140px",
+            fontWeight: "bold",
+            padding: "0.5rem",
+            background: "#e8f0fe",
+          }}
+        >
+          <div>Type</div>
+          <div>Amount</div>
+          <div>Date</div>
+          <div>Paid By</div>
+          <div>Actions</div>
         </div>
-        {bills.map(bill => (
-          <div key={bill.id} style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr 140px", padding: "0.5rem", borderBottom: "1px solid #ccc" }}>
+        {bills.map((bill) => (
+          <div
+            key={bill.id}
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr 1fr 1fr 140px",
+              padding: "0.5rem",
+              borderBottom: "1px solid #ccc",
+            }}
+          >
             <div>{bill.utility_type}</div>
             <div>₹{bill.amount.toFixed(2)}</div>
             <div>{new Date(bill.bill_date).toLocaleDateString()}</div>
             <div>{bill.added_by}</div>
             <div style={{ display: "flex", gap: "0.5rem" }}>
-              <button onClick={() => startEditBill(bill)} style={buttonStylePrimary}>Edit</button>
-              <button onClick={() => deleteBill(bill.id)} style={buttonStyleSecondary}>Delete</button>
+              <button onClick={() => startEditBill(bill)} style={buttonStylePrimary}>
+                Edit
+              </button>
+              <button onClick={() => deleteBill(bill.id)} style={buttonStyleSecondary}>
+                Delete
+              </button>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Charts */}
-      <h2 style={{ marginTop: "3rem", color: "#0070d2" }}>Reports</h2>
+      {/* Analytics Section */}
+      <h2 style={{ marginTop: "3rem", color: "#0070d2" }}>Analytics</h2>
 
-      <div style={{ display: "grid", gap: "2rem", marginTop: "1rem" }}>
-        <div>
-          <h3>Expense by Person</h3>
-          <div style={{ width: "100%", height: "400px" }}>
-            <Pie
-              data={{
-                labels: Object.keys(expenseByPerson),
-                datasets: [{
-                  data: Object.values(expenseByPerson),
-                  backgroundColor: ["#0070d2", "#00a1e0", "#f4c430", "#ff6384", "#36a2eb"],
-                }],
-              }}
-              options={{ maintainAspectRatio: false }}
-            />
-          </div>
+      <div
+        style={{
+          display: "flex",
+          gap: "2rem",
+          flexWrap: "wrap",
+          justifyContent: "space-between",
+        }}
+      >
+        {/* Expense by Person */}
+        <div style={{ flex: "1 1 300px", background: "white", padding: "1rem", borderRadius: "8px", boxShadow: "0 0 8px rgba(0,0,0,0.1)" }}>
+          <h3 style={{ color: "#0070d2" }}>Expense by Person</h3>
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <tbody>
+              {Object.entries(expenseByPerson).map(([person, amt]) => (
+                <tr key={person} style={{ borderBottom: "1px solid #ddd" }}>
+                  <td style={{ padding: "0.5rem 0" }}>{person}</td>
+                  <td style={{ padding: "0.5rem 0", textAlign: "right" }}>₹{amt.toFixed(2)}</td>
+                </tr>
+              ))}
+              {!Object.keys(expenseByPerson).length && <tr><td colSpan={2} style={{textAlign:"center", padding:"1rem"}}>No data</td></tr>}
+            </tbody>
+          </table>
         </div>
 
-        <div>
-          <h3>Expense by Type</h3>
-          <div style={{ width: "100%", height: "400px" }}>
-            <Bar
-              data={{
-                labels: Object.keys(expenseByType),
-                datasets: [{
-                  label: "Amount (₹)",
-                  data: Object.values(expenseByType),
-                  backgroundColor: "#00a1e0",
-                }],
-              }}
-              options={{
-                maintainAspectRatio: false,
-                responsive: true,
-                plugins: { legend: { display: false } },
-              }}
-            />
-          </div>
+        {/* Expense by Type */}
+        <div style={{ flex: "1 1 300px", background: "white", padding: "1rem", borderRadius: "8px", boxShadow: "0 0 8px rgba(0,0,0,0.1)" }}>
+          <h3 style={{ color: "#0070d2" }}>Expense by Type</h3>
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <tbody>
+              {Object.entries(expenseByType).map(([type, amt]) => (
+                <tr key={type} style={{ borderBottom: "1px solid #ddd" }}>
+                  <td style={{ padding: "0.5rem 0" }}>{type}</td>
+                  <td style={{ padding: "0.5rem 0", textAlign: "right" }}>₹{amt.toFixed(2)}</td>
+                </tr>
+              ))}
+              {!Object.keys(expenseByType).length && <tr><td colSpan={2} style={{textAlign:"center", padding:"1rem"}}>No data</td></tr>}
+            </tbody>
+          </table>
         </div>
 
-        <div>
-          <h3>Expense by Month</h3>
-          <div style={{ width: "100%", height: "400px" }}>
-            <Bar
-              data={{
-                labels: Object.keys(expenseByMonth),
-                datasets: [{
-                  label: "Amount (₹)",
-                  data: Object.values(expenseByMonth),
-                  backgroundColor: "#f4c430",
-                }],
-              }}
-              options={{
-                maintainAspectRatio: false,
-                responsive: true,
-                plugins: { legend: { display: false } },
-              }}
-            />
-          </div>
+        {/* Expense by Month */}
+        <div style={{ flex: "1 1 300px", background: "white", padding: "1rem", borderRadius: "8px", boxShadow: "0 0 8px rgba(0,0,0,0.1)" }}>
+          <h3 style={{ color: "#0070d2" }}>Expense by Month</h3>
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <tbody>
+              {Object.entries(expenseByMonth).map(([month, amt]) => (
+                <tr key={month} style={{ borderBottom: "1px solid #ddd" }}>
+                  <td style={{ padding: "0.5rem 0" }}>{month}</td>
+                  <td style={{ padding: "0.5rem 0", textAlign: "right" }}>₹{amt.toFixed(2)}</td>
+                </tr>
+              ))}
+              {!Object.keys(expenseByMonth).length && <tr><td colSpan={2} style={{textAlign:"center", padding:"1rem"}}>No data</td></tr>}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
