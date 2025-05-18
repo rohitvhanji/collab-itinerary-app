@@ -97,13 +97,13 @@ function App() {
     <div className="container" style={{
       maxWidth: '900px',
       margin: '2rem auto',
-      backgroundColor: '#f8f9fa',
+      backgroundColor: '#F4F8FB',  // Salesforce light blue background
       borderRadius: '10px',
       padding: '2rem',
       boxShadow: '0 0 15px rgba(0,0,0,0.1)'
     }}>
       <h1 style={{ color: '#2c3e50', marginBottom: '1.5rem', textAlign: 'center' }}>
-        Utility Bill Tracker
+        Spendly
       </h1>
       <div className="form" style={{
         display: 'flex',
