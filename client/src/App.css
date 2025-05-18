@@ -1,198 +1,136 @@
-/* Overall Container */
+/* Container */
 .app-container {
   max-width: 900px;
-  width: 100%;
   margin: 2rem auto;
   padding: 2rem;
-  background-color: #f0f8ff; /* Salesforce light blue */
+  background-color: #f9fbff;
   border-radius: 12px;
-  box-shadow: 0 4px 10px rgb(0 0 0 / 0.1);
-  min-height: 600px;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* App Title */
+/* Title */
 .app-title {
   text-align: center;
   color: #0070d2;
-  margin-bottom: 2rem;
   font-weight: 700;
   font-size: 2rem;
+  margin-bottom: 2rem;
 }
 
-/* Input Row Styling */
+/* Input Row */
 .input-row {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.75rem;
   margin-bottom: 2rem;
-  align-items: center;
-  flex-wrap: wrap;
   justify-content: center;
 }
 
 .input-row input {
   padding: 0.5rem 0.75rem;
   border: 1px solid #ccc;
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 1rem;
-}
-
-/* Input Widths */
-.input-utility-type {
-  flex: 1 1 150px;
   min-width: 140px;
+  flex: 1 1 150px;
+  box-sizing: border-box;
 }
 
 .input-amount {
-  flex: 1 1 100px;
-  min-width: 90px;
+  max-width: 120px;
 }
 
 .input-bill-date {
-  flex: 1 1 140px;
-  min-width: 130px;
+  max-width: 160px;
 }
 
 .input-paid-by {
-  flex: 1 1 140px;
-  min-width: 130px;
+  max-width: 140px;
 }
 
-/* Primary Button */
 .button-primary {
   background-color: #0070d2;
   color: white;
   border: none;
-  border-radius: 4px;
-  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  padding: 0.55rem 1.2rem;
   cursor: pointer;
   font-weight: 600;
-  white-space: nowrap;
   flex: 0 0 auto;
+  white-space: nowrap;
+  transition: background-color 0.3s ease;
 }
 
-/* Secondary Button */
+.button-primary:hover {
+  background-color: #005bb5;
+}
+
 .button-secondary {
-  background-color: #e0e6ed;
-  color: #333;
-  border: none;
-  border-radius: 4px;
-  padding: 0.5rem 1rem;
+  background-color: #e6f0fa;
+  color: #0070d2;
+  border: 1px solid #0070d2;
+  border-radius: 6px;
+  padding: 0.4rem 0.9rem;
   cursor: pointer;
   font-weight: 600;
   white-space: nowrap;
-  flex: 0 0 auto;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* List of Bills */
+.button-secondary:hover {
+  background-color: #0070d2;
+  color: white;
+}
+
+/* Bills List Header */
+.bills-list-header,
+.bills-list-item {
+  display: flex;
+  align-items: center;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid #dcdcdc;
+  box-sizing: border-box;
+}
+
+/* Header Specific */
+.bills-list-header {
+  font-weight: 700;
+  background-color: #e6f2ff;
+  border-bottom: 2px solid #0070d2;
+}
+
+/* Columns */
+.bill-column {
+  flex: 1 1 150px;
+  min-width: 140px;
+  padding: 0 0.8rem;
+  text-align: left;
+  word-break: break-word;
+  box-sizing: border-box;
+}
+
+/* Actions column */
+.bill-column-actions {
+  flex: 1 1 140px;
+  min-width: 140px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding: 0 0.8rem;
+  box-sizing: border-box;
+}
+
+/* Bills List Container */
 .bills-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  max-height: 350px;
+  max-height: 400px;
   overflow-y: auto;
 }
 
-.bills-list-item,
-.bills-list-header {
-  display: flex;
-  align-items: center;
-  padding: 0.5rem 0;
-  border-bottom: 1px solid #ddd;
-}
-
-.bills-list-header {
-  font-weight: bold;
-  background-color: #e6f2ff;
-}
-
-.bill-column {
-  flex: 1 1 150px;
-  min-width: 120px;
-  padding: 0 8px;
-  text-align: left;
-  word-break: break-word;
-}
-
-.bill-column-actions {
-  flex: 1 1 180px;
-  min-width: 160px;
-  display: flex;
-  gap: 0.5rem;
-  justify-content: flex-end;
-}
-
-/* Consistent Date Color */
-.bills-list-item-info span.date {
-  color: #0070d2;
-  font-weight: 500;
-}
-
-/* Action Buttons */
-.bills-list-item-actions {
-  flex: 1 1 35%;
-  min-width: 200px;
-  display: flex;
-  gap: 0.5rem;
-  justify-content: flex-end;
-  flex-wrap: wrap;
-}
-
-.bills-list-item-actions button {
-  flex: 1 1 90px;
-}
-
-/* No Bills Message */
+/* No bills message */
 .no-bills {
   text-align: center;
   padding: 1rem;
-  color: #666;
   font-style: italic;
-}
-
-/* Analytics Container */
-.analytics-container {
-  margin-top: 40px;
-  padding: 20px;
-  background-color: #eef4fb; /* Light Salesforce-style analytics bg */
-  border-radius: 8px;
-  border: 1px solid #cfd8e3;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-/* Section Title */
-.analytics-summary h3 {
-  margin-bottom: 15px;
-  font-weight: 600;
-  font-size: 1.25rem;
-  color: #1a1a1a;
-}
-
-/* Section Layout */
-.analytics-section {
-  margin-bottom: 20px;
-}
-
-/* List Items */
-.analytics-section ul {
-  list-style-type: none;
-  padding-left: 0;
-}
-
-.analytics-section li {
-  padding: 4px 0;
-  border-bottom: 1px solid #eee;
-  font-size: 0.95rem;
-  color: #333;
-}
-
-/* Month Picker Styling */
-.month-picker {
-  margin-left: 10px;
-  padding: 6px 12px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 0.95rem;
-  color: #0070d2;
+  color: #666;
 }
