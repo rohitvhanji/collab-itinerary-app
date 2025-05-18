@@ -173,10 +173,10 @@ export default function App() {
           </div>
 
           <div className="bills-list">
-            {bills.length === 0 ? (
+            {filteredBills.length === 0 ? (
               <div className="no-bills">No bills added yet</div>
             ) : (
-              bills.map(({ id, utilityType, amount, billDate, paidBy }) => (
+              filteredBills.map(({ id, utilityType, amount, billDate, paidBy }) => (
                 <div className="bills-list-item" key={id}>
                   <div className="bill-column">{utilityType}</div>
                   <div className="bill-column">₹ {amount}</div>
