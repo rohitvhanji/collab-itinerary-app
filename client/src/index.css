@@ -1,7 +1,10 @@
+/* client/index.css */
+
 body {
   font-family: Arial, sans-serif;
   padding: 2rem;
   background-color: #f9f9f9;
+  margin: 0; /* Reset default margin */
 }
 
 .container {
