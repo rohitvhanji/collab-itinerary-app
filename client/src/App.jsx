@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 
 const months = [
   { value: "", label: "All Months" },
@@ -25,6 +25,23 @@ export default function App() {
   const [editingId, setEditingId] = useState(null);
   const [filterMonth, setFilterMonth] = useState("");
 
+  // Load bills from localStorage on mount
+  useEffect(() => {
+    const savedBills = localStorage.getItem("bills");
+    if (savedBills) {
+      try {
+        setBills(JSON.parse(savedBills));
+      } catch {
+        setBills([]);
+      }
+    }
+  }, []);
+
+  // Save bills to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem("bills", JSON.stringify(bills));
+  }, [bills]);
+
   const saveBill = () => {
     if (!utilityType || !amount || !billDate || !paidBy) {
       alert("Please fill all fields");
@@ -35,7 +52,13 @@ export default function App() {
       setBills((prev) =>
         prev.map((bill) =>
           bill.id === editingId
-            ? { id: editingId, utilityType, amount: parseFloat(amount).toFixed(2), billDate, paidBy }
+            ? {
+                id: editingId,
+                utilityType,
+                amount: parseFloat(amount).toFixed(2),
+                billDate,
+                paidBy,
+              }
             : bill
         )
       );
@@ -79,7 +102,7 @@ export default function App() {
     }
   };
 
-  // Filter bills by selected month (if any)
+  // Filter bills by month if selected
   const filteredBills = useMemo(() => {
     if (!filterMonth) return bills;
     return bills.filter((bill) => bill.billDate.substring(5, 7) === filterMonth);
@@ -113,7 +136,7 @@ export default function App() {
         <input
           className="input-amount"
           type="number"
-          placeholder="Amount"
+          placeholder="Amount (₹)"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
           min="0"
@@ -137,13 +160,13 @@ export default function App() {
         </button>
       </div>
 
-      {/* Main content: bills list left, summary right */}
+      {/* Main content: expenses on left, summary on right */}
       <div className="main-content">
-        {/* Bills list */}
+        {/* Expenses list */}
         <div className="bills-section">
           <div className="bills-list-header">
             <div className="bill-column">Utility</div>
-            <div className="bill-column">Amount ($)</div>
+            <div className="bill-column">Amount (₹)</div>
             <div className="bill-column">Date</div>
             <div className="bill-column">Paid By</div>
             <div className="bill-column-actions">Actions</div>
@@ -156,7 +179,7 @@ export default function App() {
               bills.map(({ id, utilityType, amount, billDate, paidBy }) => (
                 <div className="bills-list-item" key={id}>
                   <div className="bill-column">{utilityType}</div>
-                  <div className="bill-column">${amount}</div>
+                  <div className="bill-column">₹ {amount}</div>
                   <div className="bill-column">{billDate}</div>
                   <div className="bill-column">{paidBy}</div>
                   <div className="bill-column-actions">
@@ -195,7 +218,7 @@ export default function App() {
 
           <div className="summary-info">
             <p>
-              <strong>Total Amount:</strong> ${summary.total.toFixed(2)}
+              <strong>Total Amount:</strong> ₹ {summary.total.toFixed(2)}
             </p>
 
             <h3>Spend by Person:</h3>
@@ -205,7 +228,7 @@ export default function App() {
               <ul>
                 {Object.entries(summary.byPerson).map(([person, amt]) => (
                   <li key={person}>
-                    {person}: ${amt.toFixed(2)}
+                    {person}: ₹ {amt.toFixed(2)}
                   </li>
                 ))}
               </ul>
