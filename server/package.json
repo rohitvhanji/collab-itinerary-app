@@ -1,5 +1,5 @@
 {
-  "name": "collab-itinerary-app",
+  "name": "collab-itinerary-backend",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
