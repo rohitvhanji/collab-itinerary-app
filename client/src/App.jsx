@@ -11,7 +11,6 @@ function App() {
 
   const backendUrl = 'https://collab-itinerary-app.onrender.com'; // replace with your backend URL
 
-  // Fetch bills for the selected home
   const fetchBills = async () => {
     try {
       setLoading(true);
@@ -45,8 +44,7 @@ function App() {
     try {
       setLoading(true);
       await axios.post(`${backendUrl}/api/bills`, newBill);
-      await fetchBills();  // Refresh list after adding
-      // Clear form
+      await fetchBills();
       setUtilityType('');
       setAmount('');
       setBillDate('');
@@ -59,10 +57,16 @@ function App() {
   };
 
   return (
-    <div className="container" style={{ maxWidth: 600, margin: 'auto', padding: 20, fontFamily: 'Arial, sans-serif' }}>
+    <div
+      className="container"
+      style={{ maxWidth: 600, margin: 'auto', padding: 20, fontFamily: 'Arial, sans-serif' }}
+    >
       <h1 style={{ textAlign: 'center' }}>Utility Bill Tracker</h1>
 
-      <div className="form" style={{ marginBottom: 20, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+      <div
+        className="form"
+        style={{ marginBottom: 20, display: 'flex', gap: 10, flexWrap: 'wrap' }}
+      >
         <input
           value={utilityType}
           onChange={e => setUtilityType(e.target.value)}
@@ -83,7 +87,36 @@ function App() {
           type="date"
           style={{ flex: '1 1 150px', padding: 8 }}
         />
-        <button onClick={addBill} disabled={loading} style={{ padding: '8px 16px' }}>
+        <button
+          onClick={addBill}
+          disabled={loading}
+          style={{
+            padding: '8px 16px',
+            cursor: loading ? 'not-allowed' : 'pointer',
+            backgroundColor: '#2563EB', // nice blue
+            color: 'white',
+            border: 'none',
+            borderRadius: 5,
+            transition: 'background-color 0.2s, transform 0.1s',
+            userSelect: 'none',
+          }}
+          onMouseDown={e => {
+            e.currentTarget.style.transform = 'scale(0.95)';
+          }}
+          onMouseUp={e => {
+            e.currentTarget.style.transform = 'scale(1)';
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.transform = 'scale(1)';
+          }}
+          onFocus={e => {
+            e.currentTarget.style.outline = '2px solid #60A5FA';
+            e.currentTarget.style.outlineOffset = '2px';
+          }}
+          onBlur={e => {
+            e.currentTarget.style.outline = 'none';
+          }}
+        >
           {loading ? 'Processing...' : 'Add Bill'}
         </button>
       </div>
