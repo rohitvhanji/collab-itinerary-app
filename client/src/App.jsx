@@ -25,6 +25,7 @@ export default function App() {
         `https://collab-itinerary-app.onrender.com/api/bills/${homeId}`
       );
       setBills(res.data);
+      console.log("Success fetching bills:", res);
     } catch (error) {
       console.error("Error fetching bills:", error);
       setBills([]); // reset on error
