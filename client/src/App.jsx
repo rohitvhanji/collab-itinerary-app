@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import './App.css';
 
 function App() {
   const [bills, setBills] = useState([]);
@@ -9,23 +8,15 @@ function App() {
   const [amount, setAmount] = useState('');
   const [billDate, setBillDate] = useState('');
   const [paidBy, setPaidBy] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [editingBill, setEditingBill] = useState(null);
 
-  const [editingId, setEditingId] = useState(null);
-  const [editUtilityType, setEditUtilityType] = useState('');
-  const [editAmount, setEditAmount] = useState('');
-  const [editBillDate, setEditBillDate] = useState('');
-  const [editPaidBy, setEditPaidBy] = useState('');
-
+  // Fetch bills function with error handling
   const fetchBills = async () => {
     try {
-      setLoading(true);
       const res = await axios.get(`https://collab-itinerary-app.onrender.com/api/bills/${homeId}`);
       setBills(res.data);
-    } catch (err) {
-      console.error('Error fetching bills:', err);
-    } finally {
-      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching bills:', error);
     }
   };
 
@@ -33,151 +24,214 @@ function App() {
     fetchBills();
   }, [homeId]);
 
-  const addBill = async () => {
-    if (!utilityType.trim() || !amount || !billDate || !paidBy.trim()) return;
+  // Add or Update bill function
+  const addOrUpdateBill = async () => {
+    if (!utilityType || !amount || !billDate || !paidBy) return;
+
     try {
-      const newBill = {
-        home_id: homeId,
-        utility_type: utilityType.trim(),
-        amount: parseFloat(amount),
-        bill_date: billDate,
-        added_by: paidBy.trim(),
-      };
-      await axios.post('https://collab-itinerary-app.onrender.com/api/bills', newBill);
-      fetchBills();  // refresh list after adding
+      if (editingBill) {
+        // Update existing bill
+        await axios.put(`https://collab-itinerary-app.onrender.com/api/bills/${editingBill.id}`, {
+          home_id: homeId,
+          utility_type: utilityType,
+          amount: parseFloat(amount),
+          bill_date: billDate,
+          paid_by: paidBy,
+          added_by: 'User',
+        });
+        setEditingBill(null);
+      } else {
+        // Add new bill
+        await axios.post('https://collab-itinerary-app.onrender.com/api/bills', {
+          home_id: homeId,
+          utility_type: utilityType,
+          amount: parseFloat(amount),
+          bill_date: billDate,
+          paid_by: paidBy,
+          added_by: 'User',
+        });
+      }
+      // Refresh list after add/update
+      await fetchBills();
+
+      // Reset input fields
       setUtilityType('');
       setAmount('');
       setBillDate('');
       setPaidBy('');
-    } catch (err) {
-      console.error('Error adding bill:', err);
+    } catch (error) {
+      console.error('Error adding/updating bill:', error);
     }
   };
 
+  // Delete bill function with error handling
   const deleteBill = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this bill?')) return;
     try {
       await axios.delete(`https://collab-itinerary-app.onrender.com/api/bills/${id}`);
-      fetchBills();  // refresh list after deleting
-    } catch (err) {
-      console.error('Error deleting bill:', err);
+      // Refresh list after delete
+      await fetchBills();
+    } catch (error) {
+      console.error('Error deleting bill:', error);
     }
   };
 
-  const startEditing = (bill) => {
-    setEditingId(bill.id);
-    setEditUtilityType(bill.utility_type);
-    setEditAmount(bill.amount);
-    setEditBillDate(bill.bill_date);
-    setEditPaidBy(bill.added_by);
+  // Start editing a bill: populate fields
+  const startEdit = (bill) => {
+    setEditingBill(bill);
+    setUtilityType(bill.utility_type);
+    setAmount(bill.amount);
+    setBillDate(bill.bill_date);
+    setPaidBy(bill.paid_by || '');
   };
 
-  const cancelEditing = () => {
-    setEditingId(null);
-  };
-
-  const saveEdit = async () => {
-    if (!editUtilityType.trim() || !editAmount || !editBillDate || !editPaidBy.trim()) return;
-    try {
-      const updatedBill = {
-        utility_type: editUtilityType.trim(),
-        amount: parseFloat(editAmount),
-        bill_date: editBillDate,
-        added_by: editPaidBy.trim(),
-      };
-      await axios.put(`https://collab-itinerary-app.onrender.com/api/bills/${editingId}`, updatedBill);
-      setEditingId(null);
-      fetchBills();  // refresh list after editing
-    } catch (err) {
-      console.error('Error updating bill:', err);
-    }
+  // Cancel editing
+  const cancelEdit = () => {
+    setEditingBill(null);
+    setUtilityType('');
+    setAmount('');
+    setBillDate('');
+    setPaidBy('');
   };
 
   return (
-    <div className="app-container">
-      <h1 className="app-title">Utility Bill Tracker</h1>
-
-      <div className="form-container">
+    <div className="container" style={{
+      maxWidth: '900px',
+      margin: '2rem auto',
+      backgroundColor: '#f8f9fa',
+      borderRadius: '10px',
+      padding: '2rem',
+      boxShadow: '0 0 15px rgba(0,0,0,0.1)'
+    }}>
+      <h1 style={{ color: '#2c3e50', marginBottom: '1.5rem', textAlign: 'center' }}>
+        Utility Bill Tracker
+      </h1>
+      <div className="form" style={{
+        display: 'flex',
+        gap: '1rem',
+        marginBottom: '1.5rem',
+        flexWrap: 'wrap',
+        justifyContent: 'center'
+      }}>
         <input
-          type="text"
-          placeholder="Utility Type"
           value={utilityType}
-          onChange={(e) => setUtilityType(e.target.value)}
-          className="input-field"
+          onChange={e => setUtilityType(e.target.value)}
+          placeholder="Utility Type"
+          style={{ flex: '1 1 150px', padding: '0.5rem' }}
         />
         <input
-          type="number"
-          placeholder="Amount"
           value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          className="input-field"
+          onChange={e => setAmount(e.target.value)}
+          placeholder="Amount"
+          type="number"
+          style={{ flex: '1 1 100px', padding: '0.5rem' }}
         />
         <input
-          type="date"
           value={billDate}
-          onChange={(e) => setBillDate(e.target.value)}
-          className="input-field"
+          onChange={e => setBillDate(e.target.value)}
+          placeholder="Bill Date"
+          type="date"
+          style={{ flex: '1 1 150px', padding: '0.5rem' }}
         />
         <input
-          type="text"
-          placeholder="Paid By"
           value={paidBy}
-          onChange={(e) => setPaidBy(e.target.value)}
-          className="input-field"
+          onChange={e => setPaidBy(e.target.value)}
+          placeholder="Paid By"
+          style={{ flex: '1 1 150px', padding: '0.5rem' }}
         />
-        <button className="add-button" onClick={addBill} disabled={loading}>
-          {loading ? 'Adding...' : 'Add Bill'}
+        <button
+          onClick={addOrUpdateBill}
+          style={{
+            backgroundColor: '#27ae60',
+            color: 'white',
+            padding: '0.6rem 1.2rem',
+            border: 'none',
+            borderRadius: '5px',
+            cursor: 'pointer',
+            flex: '0 0 auto',
+            alignSelf: 'center',
+            minWidth: '100px',
+          }}
+        >
+          {editingBill ? 'Update Bill' : 'Add Bill'}
         </button>
+        {editingBill && (
+          <button
+            onClick={cancelEdit}
+            style={{
+              backgroundColor: '#e74c3c',
+              color: 'white',
+              padding: '0.6rem 1.2rem',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: 'pointer',
+              flex: '0 0 auto',
+              alignSelf: 'center',
+              minWidth: '100px',
+            }}
+          >
+            Cancel
+          </button>
+        )}
       </div>
 
-      <ul className="bills-list">
-        {bills.length === 0 && !loading && <li className="empty-text">No bills added yet.</li>}
-        {bills.map((bill) => (
-          <li key={bill.id} className="bill-item">
-            {editingId === bill.id ? (
-              <>
-                <input
-                  className="edit-input utility-edit"
-                  type="text"
-                  value={editUtilityType}
-                  onChange={(e) => setEditUtilityType(e.target.value)}
-                />
-                <input
-                  className="edit-input amount-edit"
-                  type="number"
-                  value={editAmount}
-                  onChange={(e) => setEditAmount(e.target.value)}
-                />
-                <input
-                  className="edit-input date-edit"
-                  type="date"
-                  value={editBillDate}
-                  onChange={(e) => setEditBillDate(e.target.value)}
-                />
-                <input
-                  className="edit-input paidby-edit"
-                  type="text"
-                  value={editPaidBy}
-                  onChange={(e) => setEditPaidBy(e.target.value)}
-                />
-                <button className="save-btn" onClick={saveEdit}>Save</button>
-                <button className="cancel-btn" onClick={cancelEditing}>Cancel</button>
-              </>
-            ) : (
-              <>
-                <span className="bill-date">{bill.bill_date}</span>
-                <span className="bill-utility">{bill.utility_type}</span>
-                <span className="bill-amount">₹{bill.amount.toFixed(2)}</span>
-                <span className="bill-addedby">(paid by {bill.added_by})</span>
-                <div className="actions">
-                  <button className="edit-btn" onClick={() => startEditing(bill)}>Edit</button>
-                  <button className="delete-btn" onClick={() => deleteBill(bill.id)}>Delete</button>
-                </div>
-              </>
-            )}
-          </li>
-        ))}
-      </ul>
+      <table style={{ width: '100%', borderCollapse: 'collapse', backgroundColor: 'white' }}>
+        <thead style={{ backgroundColor: '#34495e', color: 'white' }}>
+          <tr>
+            <th style={{ padding: '0.8rem', border: '1px solid #ddd' }}>Date</th>
+            <th style={{ padding: '0.8rem', border: '1px solid #ddd' }}>Utility Type</th>
+            <th style={{ padding: '0.8rem', border: '1px solid #ddd' }}>Amount (₹)</th>
+            <th style={{ padding: '0.8rem', border: '1px solid #ddd' }}>Paid By</th>
+            <th style={{ padding: '0.8rem', border: '1px solid #ddd' }}>Added By</th>
+            <th style={{ padding: '0.8rem', border: '1px solid #ddd' }}>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {bills.length === 0 && (
+            <tr>
+              <td colSpan="6" style={{ padding: '1rem', textAlign: 'center', color: '#999' }}>
+                No bills found.
+              </td>
+            </tr>
+          )}
+          {bills.map((bill) => (
+            <tr key={bill.id} style={{ borderBottom: '1px solid #ddd' }}>
+              <td style={{ padding: '0.6rem', border: '1px solid #ddd' }}>{bill.bill_date}</td>
+              <td style={{ padding: '0.6rem', border: '1px solid #ddd' }}>{bill.utility_type}</td>
+              <td style={{ padding: '0.6rem', border: '1px solid #ddd' }}>{bill.amount.toFixed(2)}</td>
+              <td style={{ padding: '0.6rem', border: '1px solid #ddd' }}>{bill.paid_by}</td>
+              <td style={{ padding: '0.6rem', border: '1px solid #ddd' }}>{bill.added_by}</td>
+              <td style={{ padding: '0.6rem', border: '1px solid #ddd', display: 'flex', gap: '0.5rem' }}>
+                <button
+                  onClick={() => startEdit(bill)}
+                  style={{
+                    backgroundColor: '#2980b9',
+                    color: 'white',
+                    border: 'none',
+                    padding: '0.3rem 0.7rem',
+                    borderRadius: '3px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => deleteBill(bill.id)}
+                  style={{
+                    backgroundColor: '#c0392b',
+                    color: 'white',
+                    border: 'none',
+                    padding: '0.3rem 0.7rem',
+                    borderRadius: '3px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Delete
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
