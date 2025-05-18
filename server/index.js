@@ -15,7 +15,7 @@ app.get('/api/bills/:homeId', async (req, res) => {
     .from('utility_bills')
     .select('*')
     .eq('home_id', homeId);
-  if (error) return res.status(500).json({ error });
+  if (error) return res.status(500).json({ error: error.message });
   res.json(data);
 });
 
@@ -23,8 +23,9 @@ app.post('/api/bills', async (req, res) => {
   const { home_id, utility_type, amount, bill_date, added_by } = req.body;
   const { data, error } = await supabase
     .from('utility_bills')
-    .insert([{ home_id, utility_type, amount, bill_date, added_by }]);
-  if (error) return res.status(500).json({ error });
+    .insert([{ home_id, utility_type, amount, bill_date, added_by }])
+    .select();  // <-- Add this to return inserted rows
+  if (error) return res.status(500).json({ error: error.message });
   res.json(data);
 });
 
