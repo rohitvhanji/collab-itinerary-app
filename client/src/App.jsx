@@ -1,144 +1,109 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-import "./App.css";
+import React, { useState, useEffect } from "react";
 
 export default function App() {
   const [bills, setBills] = useState([]);
-  const [homeId] = useState("home_001");
   const [utilityType, setUtilityType] = useState("");
   const [amount, setAmount] = useState("");
   const [billDate, setBillDate] = useState("");
   const [paidBy, setPaidBy] = useState("");
-  const [editingBillId, setEditingBillId] = useState(null);
 
-  // Selected month for analytics filter (YYYY-MM)
-  const [selectedMonth, setSelectedMonth] = useState(() => {
-    const now = new Date();
-    return now.toISOString().slice(0, 7);
-  });
-
-  async function fetchBills() {
-    try {
-      const res = await axios.get(
-        `https://collab-itinerary-app.onrender.com/api/bills/${homeId}`
-      );
-      setBills(res.data);
-    } catch (error) {
-      console.error("Error fetching bills:", error);
-      setBills([]);
+  // Add a new bill entry
+  const addBill = () => {
+    if (!utilityType || !amount || !billDate || !paidBy) {
+      alert("Please fill all fields");
+      return;
     }
-  }
-
-  useEffect(() => {
-    fetchBills();
-  }, [homeId]);
-
-  const resetInputs = () => {
+    const newBill = {
+      id: Date.now(),
+      utilityType,
+      amount: parseFloat(amount).toFixed(2),
+      billDate,
+      paidBy,
+    };
+    setBills([...bills, newBill]);
     setUtilityType("");
     setAmount("");
     setBillDate("");
     setPaidBy("");
-    setEditingBillId(null);
   };
 
-  const addOrUpdateBill = async () => {
-    if (!utilityType || !amount || !billDate || !paidBy) {
-      alert("All fields are required");
-      return;
-    }
-
-    try {
-      if (editingBillId) {
-        await axios.put(
-          `https://collab-itinerary-app.onrender.com/api/bills/${editingBillId}`,
-          {
-            utility_type: utilityType,
-            amount: parseFloat(amount),
-            bill_date: billDate,
-            added_by: paidBy,
-          }
-        );
-      } else {
-        await axios.post("https://collab-itinerary-app.onrender.com/api/bills", {
-          home_id: homeId,
-          utility_type: utilityType,
-          amount: parseFloat(amount),
-          bill_date: billDate,
-          added_by: paidBy,
-        });
-      }
-      await fetchBills();
-      resetInputs();
-    } catch (error) {
-      console.error("Error adding/updating expense:", error);
-      alert("Failed to add or update expense.");
-    }
+  // Delete a bill entry by id
+  const deleteBill = (id) => {
+    setBills(bills.filter((bill) => bill.id !== id));
   };
-
-  const deleteBill = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this expense?")) return;
-
-    try {
-      await axios.delete(`https://collab-itinerary-app.onrender.com/api/bills/${id}`);
-      if (editingBillId === id) resetInputs();
-      await fetchBills();
-    } catch (error) {
-      console.error("Error deleting expense:", error);
-      alert("Failed to delete expense.");
-    }
-  };
-
-  const startEditBill = (bill) => {
-    setEditingBillId(bill.id);
-    setUtilityType(bill.utility_type);
-    setAmount(bill.amount);
-    setBillDate(bill.bill_date);
-    setPaidBy(bill.added_by);
-  };
-
-  const cancelEdit = () => {
-    resetInputs();
-  };
-
-  // Filter bills for selected month (YYYY-MM)
-  const filteredBills = bills.filter((bill) => bill.bill_date.startsWith(selectedMonth));
-
-  // Analytics calculations
-  const totalExpense = filteredBills.reduce((sum, bill) => sum + bill.amount, 0);
-
-  const expenseByPerson = {};
-  filteredBills.forEach((bill) => {
-    if (!expenseByPerson[bill.added_by]) expenseByPerson[bill.added_by] = 0;
-    expenseByPerson[bill.added_by] += bill.amount;
-  });
-
-  const expenseByCategory = {};
-  filteredBills.forEach((bill) => {
-    if (!expenseByCategory[bill.utility_type]) expenseByCategory[bill.utility_type] = 0;
-    expenseByCategory[bill.utility_type] += bill.amount;
-  });
 
   return (
-    <>
-      <div className="app-container">
-        <h1 className="app-title">Spendly — Expense Tracker</h1>
+    <div className="app-container">
+      <h1 className="app-title">Collaborative Utility Bills Tracker</h1>
 
-        <div className="input-row">
-          <input
-            type="text"
-            placeholder="Expense Type"
-            value={utilityType}
-            onChange={(e) => setUtilityType(e.target.value)}
-            className="input-utility-type"
-          />
-          <input
-            type="number"
-            placeholder="Amount"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            className="input-amount"
-          />
-          <input
-            type="date"
-            placeholder="Expense Date"
-            value={
+      {/* Input Row */}
+      <div className="input-row">
+        <input
+          className="input-utility-type"
+          type="text"
+          placeholder="Utility Type (Electricity, Gas)"
+          value={utilityType}
+          onChange={(e) => setUtilityType(e.target.value)}
+        />
+        <input
+          className="input-amount"
+          type="number"
+          placeholder="Amount"
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+          min="0"
+          step="0.01"
+        />
+        <input
+          className="input-bill-date"
+          type="date"
+          value={billDate}
+          onChange={(e) => setBillDate(e.target.value)}
+        />
+        <input
+          className="input-paid-by"
+          type="text"
+          placeholder="Paid By"
+          value={paidBy}
+          onChange={(e) => setPaidBy(e.target.value)}
+        />
+        <button className="button-primary" onClick={addBill}>
+          Add Bill
+        </button>
+      </div>
+
+      {/* Bills Table Header */}
+      <div className="bills-list-header">
+        <div className="bill-column">Utility</div>
+        <div className="bill-column">Amount ($)</div>
+        <div className="bill-column">Date</div>
+        <div className="bill-column">Paid By</div>
+        <div className="bill-column-actions">Actions</div>
+      </div>
+
+      {/* Bills List */}
+      <div className="bills-list">
+        {bills.length === 0 ? (
+          <div className="no-bills">No bills added yet</div>
+        ) : (
+          bills.map(({ id, utilityType, amount, billDate, paidBy }) => (
+            <div className="bills-list-item" key={id}>
+              <div className="bill-column">{utilityType}</div>
+              <div className="bill-column">${amount}</div>
+              <div className="bill-column">{billDate}</div>
+              <div className="bill-column">{paidBy}</div>
+              <div className="bill-column-actions">
+                <button
+                  className="button-secondary"
+                  onClick={() => deleteBill(id)}
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
