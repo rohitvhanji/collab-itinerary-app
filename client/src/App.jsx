@@ -1,9 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import {
-  Bar,
-  Pie,
-} from "react-chartjs-2";
+import { Bar, Pie } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   ArcElement,
@@ -191,37 +188,60 @@ export default function App() {
       <div style={{ display: "grid", gap: "2rem", marginTop: "1rem" }}>
         <div>
           <h3>Expense by Person</h3>
-          <Pie data={{
-            labels: Object.keys(expenseByPerson),
-            datasets: [{
-              data: Object.values(expenseByPerson),
-              backgroundColor: ["#0070d2", "#00a1e0", "#f4c430", "#ff6384", "#36a2eb"],
-            }]
-          }} />
+          <div style={{ width: "100%", height: "400px" }}>
+            <Pie
+              data={{
+                labels: Object.keys(expenseByPerson),
+                datasets: [{
+                  data: Object.values(expenseByPerson),
+                  backgroundColor: ["#0070d2", "#00a1e0", "#f4c430", "#ff6384", "#36a2eb"],
+                }],
+              }}
+              options={{ maintainAspectRatio: false }}
+            />
+          </div>
         </div>
 
         <div>
           <h3>Expense by Type</h3>
-          <Bar data={{
-            labels: Object.keys(expenseByType),
-            datasets: [{
-              label: "Amount (₹)",
-              data: Object.values(expenseByType),
-              backgroundColor: "#00a1e0",
-            }]
-          }} options={{ responsive: true, plugins: { legend: { display: false } } }} />
+          <div style={{ width: "100%", height: "400px" }}>
+            <Bar
+              data={{
+                labels: Object.keys(expenseByType),
+                datasets: [{
+                  label: "Amount (₹)",
+                  data: Object.values(expenseByType),
+                  backgroundColor: "#00a1e0",
+                }],
+              }}
+              options={{
+                maintainAspectRatio: false,
+                responsive: true,
+                plugins: { legend: { display: false } },
+              }}
+            />
+          </div>
         </div>
 
         <div>
           <h3>Expense by Month</h3>
-          <Bar data={{
-            labels: Object.keys(expenseByMonth),
-            datasets: [{
-              label: "Amount (₹)",
-              data: Object.values(expenseByMonth),
-              backgroundColor: "#f4c430",
-            }]
-          }} options={{ responsive: true, plugins: { legend: { display: false } } }} />
+          <div style={{ width: "100%", height: "400px" }}>
+            <Bar
+              data={{
+                labels: Object.keys(expenseByMonth),
+                datasets: [{
+                  label: "Amount (₹)",
+                  data: Object.values(expenseByMonth),
+                  backgroundColor: "#f4c430",
+                }],
+              }}
+              options={{
+                maintainAspectRatio: false,
+                responsive: true,
+                plugins: { legend: { display: false } },
+              }}
+            />
+          </div>
         </div>
       </div>
     </div>
