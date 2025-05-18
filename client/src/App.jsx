@@ -1,4 +1,20 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
+
+const months = [
+  { value: "", label: "All Months" },
+  { value: "01", label: "January" },
+  { value: "02", label: "February" },
+  { value: "03", label: "March" },
+  { value: "04", label: "April" },
+  { value: "05", label: "May" },
+  { value: "06", label: "June" },
+  { value: "07", label: "July" },
+  { value: "08", label: "August" },
+  { value: "09", label: "September" },
+  { value: "10", label: "October" },
+  { value: "11", label: "November" },
+  { value: "12", label: "December" },
+];
 
 export default function App() {
   const [bills, setBills] = useState([]);
@@ -7,8 +23,8 @@ export default function App() {
   const [billDate, setBillDate] = useState("");
   const [paidBy, setPaidBy] = useState("");
   const [editingId, setEditingId] = useState(null);
+  const [filterMonth, setFilterMonth] = useState("");
 
-  // Add or update bill
   const saveBill = () => {
     if (!utilityType || !amount || !billDate || !paidBy) {
       alert("Please fill all fields");
@@ -16,7 +32,6 @@ export default function App() {
     }
 
     if (editingId) {
-      // Update existing bill
       setBills((prev) =>
         prev.map((bill) =>
           bill.id === editingId
@@ -26,7 +41,6 @@ export default function App() {
       );
       setEditingId(null);
     } else {
-      // Add new bill
       const newBill = {
         id: Date.now(),
         utilityType,
@@ -37,14 +51,12 @@ export default function App() {
       setBills((prev) => [...prev, newBill]);
     }
 
-    // Reset input fields
     setUtilityType("");
     setAmount("");
     setBillDate("");
     setPaidBy("");
   };
 
-  // Edit a bill: populate fields
   const editBill = (id) => {
     const bill = bills.find((b) => b.id === id);
     if (bill) {
@@ -56,10 +68,8 @@ export default function App() {
     }
   };
 
-  // Delete a bill
   const deleteBill = (id) => {
     setBills((prev) => prev.filter((bill) => bill.id !== id));
-    // If deleting the bill currently being edited, reset edit mode
     if (editingId === id) {
       setEditingId(null);
       setUtilityType("");
@@ -69,16 +79,23 @@ export default function App() {
     }
   };
 
-  // Summary: total amount and count by utility type
-  const summary = bills.reduce(
-    (acc, bill) => {
-      acc.count++;
-      acc.total += parseFloat(bill.amount);
-      acc.byUtility[bill.utilityType] = (acc.byUtility[bill.utilityType] || 0) + parseFloat(bill.amount);
-      return acc;
-    },
-    { count: 0, total: 0, byUtility: {} }
-  );
+  // Filter bills by selected month (if any)
+  const filteredBills = useMemo(() => {
+    if (!filterMonth) return bills;
+    return bills.filter((bill) => bill.billDate.substring(5, 7) === filterMonth);
+  }, [bills, filterMonth]);
+
+  // Summary calculations on filtered bills
+  const summary = useMemo(() => {
+    return filteredBills.reduce(
+      (acc, bill) => {
+        acc.total += parseFloat(bill.amount);
+        acc.byPerson[bill.paidBy] = (acc.byPerson[bill.paidBy] || 0) + parseFloat(bill.amount);
+        return acc;
+      },
+      { total: 0, byPerson: {} }
+    );
+  }, [filteredBills]);
 
   return (
     <div className="app-container">
@@ -120,55 +137,82 @@ export default function App() {
         </button>
       </div>
 
-      {/* Bills Table Header */}
-      <div className="bills-list-header">
-        <div className="bill-column">Utility</div>
-        <div className="bill-column">Amount ($)</div>
-        <div className="bill-column">Date</div>
-        <div className="bill-column">Paid By</div>
-        <div className="bill-column-actions">Actions</div>
-      </div>
+      {/* Main content: bills list left, summary right */}
+      <div className="main-content">
+        {/* Bills list */}
+        <div className="bills-section">
+          <div className="bills-list-header">
+            <div className="bill-column">Utility</div>
+            <div className="bill-column">Amount ($)</div>
+            <div className="bill-column">Date</div>
+            <div className="bill-column">Paid By</div>
+            <div className="bill-column-actions">Actions</div>
+          </div>
 
-      {/* Bills List */}
-      <div className="bills-list">
-        {bills.length === 0 ? (
-          <div className="no-bills">No bills added yet</div>
-        ) : (
-          bills.map(({ id, utilityType, amount, billDate, paidBy }) => (
-            <div className="bills-list-item" key={id}>
-              <div className="bill-column">{utilityType}</div>
-              <div className="bill-column">${amount}</div>
-              <div className="bill-column">{billDate}</div>
-              <div className="bill-column">{paidBy}</div>
-              <div className="bill-column-actions">
-                <button className="button-secondary" onClick={() => editBill(id)}>
-                  Edit
-                </button>
-                <button className="button-secondary" onClick={() => deleteBill(id)}>
-                  Delete
-                </button>
-              </div>
-            </div>
-          ))
-        )}
-      </div>
-
-      {/* Summary */}
-      {bills.length > 0 && (
-        <div className="summary-container">
-          <h2>Summary</h2>
-          <p>
-            Total Bills: <strong>{summary.count}</strong> | Total Amount: <strong>${summary.total.toFixed(2)}</strong>
-          </p>
-          <ul>
-            {Object.entries(summary.byUtility).map(([util, amt]) => (
-              <li key={util}>
-                {util}: ${amt.toFixed(2)}
-              </li>
-            ))}
-          </ul>
+          <div className="bills-list">
+            {bills.length === 0 ? (
+              <div className="no-bills">No bills added yet</div>
+            ) : (
+              bills.map(({ id, utilityType, amount, billDate, paidBy }) => (
+                <div className="bills-list-item" key={id}>
+                  <div className="bill-column">{utilityType}</div>
+                  <div className="bill-column">${amount}</div>
+                  <div className="bill-column">{billDate}</div>
+                  <div className="bill-column">{paidBy}</div>
+                  <div className="bill-column-actions">
+                    <button className="button-secondary" onClick={() => editBill(id)}>
+                      Edit
+                    </button>
+                    <button className="button-secondary" onClick={() => deleteBill(id)}>
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
         </div>
-      )}
+
+        {/* Summary panel */}
+        <div className="summary-section">
+          <h2>Summary</h2>
+
+          <label htmlFor="month-filter" className="filter-label">
+            Filter by month:
+          </label>
+          <select
+            id="month-filter"
+            value={filterMonth}
+            onChange={(e) => setFilterMonth(e.target.value)}
+            className="month-filter"
+          >
+            {months.map(({ value, label }) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
+          </select>
+
+          <div className="summary-info">
+            <p>
+              <strong>Total Amount:</strong> ${summary.total.toFixed(2)}
+            </p>
+
+            <h3>Spend by Person:</h3>
+            {Object.keys(summary.byPerson).length === 0 ? (
+              <p>No data for selected month.</p>
+            ) : (
+              <ul>
+                {Object.entries(summary.byPerson).map(([person, amt]) => (
+                  <li key={person}>
+                    {person}: ${amt.toFixed(2)}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
