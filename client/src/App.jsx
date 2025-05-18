@@ -9,7 +9,7 @@ function App() {
   const [billDate, setBillDate] = useState('');
 
   useEffect(() => {
-    axios.get(`https://your-backend-url/api/bills/${homeId}`)
+    axios.get(`https://collab-itinerary-app.onrender.com/api/bills/${homeId}`)
       .then(res => setBills(res.data));
   }, [homeId]);
 
@@ -22,7 +22,7 @@ function App() {
       bill_date: billDate,
       added_by: 'User'
     };
-    const res = await axios.post('https://your-backend-url/api/bills', newBill);
+    const res = await axios.post('https://collab-itinerary-app.onrender.com/api/bills', newBill);
     setBills([...bills, ...res.data]);
     setUtilityType('');
     setAmount('');
