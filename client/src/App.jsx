@@ -172,13 +172,14 @@ export default function App() {
             </button>
           )}
         </div>
-        <div className="bills-list-header">
-          <div className="bill-column">Type</div>
-          <div className="bill-column">Amount</div>
-          <div className="bill-column">Date</div>
-          <div className="bill-column">Paid By</div>
-        </div>
         <ul className="bills-list">
+            <li className="bills-list-header">
+              <div className="bill-column">Type</div>
+              <div className="bill-column">Amount</div>
+              <div className="bill-column">Date</div>
+              <div className="bill-column">Paid By</div>
+              <div className="bill-column-actions">Actions</div>
+            </li>
           {bills.length === 0 && <li className="no-bills">No expenses found.</li>}
 
           {bills.map((bill) => (
