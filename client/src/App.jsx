@@ -44,7 +44,7 @@ function App() {
         added_by: paidBy.trim(),
       };
       await axios.post('https://collab-itinerary-app.onrender.com/api/bills', newBill);
-      fetchBills();
+      fetchBills();  // refresh list after adding
       setUtilityType('');
       setAmount('');
       setBillDate('');
@@ -58,7 +58,7 @@ function App() {
     if (!window.confirm('Are you sure you want to delete this bill?')) return;
     try {
       await axios.delete(`https://collab-itinerary-app.onrender.com/api/bills/${id}`);
-      fetchBills();
+      fetchBills();  // refresh list after deleting
     } catch (err) {
       console.error('Error deleting bill:', err);
     }
@@ -87,7 +87,7 @@ function App() {
       };
       await axios.put(`https://collab-itinerary-app.onrender.com/api/bills/${editingId}`, updatedBill);
       setEditingId(null);
-      fetchBills();
+      fetchBills();  // refresh list after editing
     } catch (err) {
       console.error('Error updating bill:', err);
     }
