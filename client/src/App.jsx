@@ -1,317 +1,251 @@
-import React, { useState, useEffect, useMemo } from "react";
-
-const months = [
-  { value: "", label: "All Months" },
-  { value: "01", label: "January" },
-  { value: "02", label: "February" },
-  { value: "03", label: "March" },
-  { value: "04", label: "April" },
-  { value: "05", label: "May" },
-  { value: "06", label: "June" },
-  { value: "07", label: "July" },
-  { value: "08", label: "August" },
-  { value: "09", label: "September" },
-  { value: "10", label: "October" },
-  { value: "11", label: "November" },
-  { value: "12", label: "December" },
-];
-
-// Change this to the real home id you want to work with
-const HOME_ID = "123";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import "./App.css";
 
 export default function App() {
   const [bills, setBills] = useState([]);
+  const [homeId] = useState("home_001");
   const [utilityType, setUtilityType] = useState("");
   const [amount, setAmount] = useState("");
   const [billDate, setBillDate] = useState("");
   const [paidBy, setPaidBy] = useState("");
-  const [editingId, setEditingId] = useState(null);
-  const [filterMonth, setFilterMonth] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [editingBillId, setEditingBillId] = useState(null);
 
-  // Fetch bills from backend on mount
-  useEffect(() => {
-    console.log("useEffect called");  // Debug: confirm useEffect runs
-    async function fetchBills() {
-      console.log("fetch bills called");  // Debug: confirm useEffect runs
-      setLoading(true);
-      setError("");
-      try {
-        const response = await fetch(`/api/bills/${HOME_ID}`);
-        if (!response.ok) throw new Error("Failed to fetch bills");
-        const data = await response.json();
-        // Normalize data if needed
-        const normalized = data.map((bill) => ({
-          id: bill.id,
-          utilityType: bill.utility_type,
-          amount: Number(bill.amount).toFixed(2),
-          billDate: bill.bill_date,
-          paidBy: bill.added_by,
-          home_id: bill.home_id,
-        }));
-        setBills(normalized);
-      } catch (err) {
-        setError(err.message || "Unknown error");
-      }
-      setLoading(false);
+  // New state to hold selected month for analytics filter
+  // Format: "YYYY-MM" e.g. "2025-05"
+  const [selectedMonth, setSelectedMonth] = useState(() => {
+    // Initialize to current month in YYYY-MM format
+    const now = new Date();
+    return now.toISOString().slice(0, 7);
+  });
+
+  async function fetchBills() {
+    try {
+      const res = await axios.get(
+        `https://collab-itinerary-app.onrender.com/api/bills/${homeId}`
+      );
+      setBills(res.data);
+    } catch (error) {
+      console.error("Error fetching bills:", error);
+      setBills([]); // reset on error
     }
-    fetchBills();
-  }, []);
+  }
 
-  // Save or update bill
-  const saveBill = async () => {
+  useEffect(() => {
+    fetchBills();
+  }, [homeId]);
+
+  const resetInputs = () => {
+    setUtilityType("");
+    setAmount("");
+    setBillDate("");
+    setPaidBy("");
+    setEditingBillId(null);
+  };
+
+  const addOrUpdateBill = async () => {
     if (!utilityType || !amount || !billDate || !paidBy) {
-      alert("Please fill all fields");
+      alert("All fields are required");
       return;
     }
-    setLoading(true);
-    setError("");
+
     try {
-      if (editingId) {
-        // Update bill via PUT
-        const response = await fetch(`/api/bills/${editingId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            utility_type: utilityType,
-            amount: parseFloat(amount),
-            bill_date: billDate,
-            added_by: paidBy,
-          }),
-        });
-        if (!response.ok) throw new Error("Failed to update bill");
-        const updated = await response.json();
-        // Update state
-        setBills((prev) =>
-          prev.map((bill) =>
-            bill.id === editingId
-              ? {
-                  ...bill,
-                  utilityType,
-                  amount: parseFloat(amount).toFixed(2),
-                  billDate,
-                  paidBy,
-                }
-              : bill
-          )
-        );
-        setEditingId(null);
-      } else {
-        // Create new bill via POST
-        const response = await fetch(`/api/bills`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            home_id: HOME_ID,
-            utility_type: utilityType,
-            amount: parseFloat(amount),
-            bill_date: billDate,
-            added_by: paidBy,
-          }),
-        });
-        if (!response.ok) throw new Error("Failed to add bill");
-        const newBills = await response.json(); // API returns inserted record(s)
-        // Append new bill(s) to state (assume first inserted record)
-        const newBill = newBills[0];
-        setBills((prev) => [
-          ...prev,
+      if (editingBillId) {
+        await axios.put(
+          `https://collab-itinerary-app.onrender.com/api/bills/${editingBillId}`,
           {
-            id: newBill.id,
-            utilityType: newBill.utility_type,
-            amount: Number(newBill.amount).toFixed(2),
-            billDate: newBill.bill_date,
-            paidBy: newBill.added_by,
-            home_id: newBill.home_id,
-          },
-        ]);
+            utility_type: utilityType,
+            amount: parseFloat(amount),
+            bill_date: billDate,
+            added_by: paidBy,
+          }
+        );
+      } else {
+        await axios.post("https://collab-itinerary-app.onrender.com/api/bills", {
+          home_id: homeId,
+          utility_type: utilityType,
+          amount: parseFloat(amount),
+          bill_date: billDate,
+          added_by: paidBy,
+        });
       }
-      // Reset inputs
-      setUtilityType("");
-      setAmount("");
-      setBillDate("");
-      setPaidBy("");
-    } catch (err) {
-      setError(err.message || "Unknown error");
-    }
-    setLoading(false);
-  };
-
-  const editBill = (id) => {
-    const bill = bills.find((b) => b.id === id);
-    if (bill) {
-      setUtilityType(bill.utilityType);
-      setAmount(bill.amount);
-      setBillDate(bill.billDate);
-      setPaidBy(bill.paidBy);
-      setEditingId(id);
+      await fetchBills();
+      resetInputs();
+    } catch (error) {
+      console.error("Error adding/updating expense:", error);
+      alert("Failed to add or update expense.");
     }
   };
 
-  // Delete bill
   const deleteBill = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this bill?")) return;
-    setLoading(true);
-    setError("");
+    if (!window.confirm("Are you sure you want to delete this expense?")) return;
+
     try {
-      const response = await fetch(`/api/bills/${id}`, {
-        method: "DELETE",
-      });
-      if (!response.ok) throw new Error("Failed to delete bill");
-      setBills((prev) => prev.filter((bill) => bill.id !== id));
-      if (editingId === id) {
-        setEditingId(null);
-        setUtilityType("");
-        setAmount("");
-        setBillDate("");
-        setPaidBy("");
-      }
-    } catch (err) {
-      setError(err.message || "Unknown error");
+      await axios.delete(`https://collab-itinerary-app.onrender.com/api/bills/${id}`);
+      if (editingBillId === id) resetInputs();
+      await fetchBills();
+    } catch (error) {
+      console.error("Error deleting expense:", error);
+      alert("Failed to delete expense.");
     }
-    setLoading(false);
   };
 
-  // Filter bills by month
-  const filteredBills = useMemo(() => {
-    if (!filterMonth) return bills;
-    return bills.filter(
-      (bill) => bill.billDate && bill.billDate.substring(5, 7) === filterMonth
-    );
-  }, [bills, filterMonth]);
+  const startEditBill = (bill) => {
+    setEditingBillId(bill.id);
+    setUtilityType(bill.utility_type);
+    setAmount(bill.amount);
+    setBillDate(bill.bill_date);
+    setPaidBy(bill.added_by);
+  };
 
-  // Summary calculation
-  const summary = useMemo(() => {
-    return filteredBills.reduce(
-      (acc, bill) => {
-        acc.total += parseFloat(bill.amount);
-        acc.byPerson[bill.paidBy] = (acc.byPerson[bill.paidBy] || 0) + parseFloat(bill.amount);
-        return acc;
-      },
-      { total: 0, byPerson: {} }
-    );
-  }, [filteredBills]);
+  const cancelEdit = () => {
+    resetInputs();
+  };
+
+  // -- New Analytics Computations --
+
+  // Filter bills for the selected month (YYYY-MM)
+  const filteredBills = bills.filter((bill) => {
+    // bill.bill_date format assumed "YYYY-MM-DD"
+    return bill.bill_date.startsWith(selectedMonth);
+  });
+
+  // Compute total expense for selected month
+  const totalExpense = filteredBills.reduce((sum, bill) => sum + bill.amount, 0);
+
+  // Compute expense by person
+  const expenseByPerson = {};
+  filteredBills.forEach((bill) => {
+    if (!expenseByPerson[bill.added_by]) expenseByPerson[bill.added_by] = 0;
+    expenseByPerson[bill.added_by] += bill.amount;
+  });
+
+  // Compute expense by category
+  const expenseByCategory = {};
+  filteredBills.forEach((bill) => {
+    if (!expenseByCategory[bill.utility_type]) expenseByCategory[bill.utility_type] = 0;
+    expenseByCategory[bill.utility_type] += bill.amount;
+  });
 
   return (
-    <div className="app-container">
-      <h1 className="app-title">Collaborative Utility Bills Tracker</h1>
+    <>
+      <div className="app-container">
+        <h1 className="app-title">Spendly — Expense Tracker</h1>
 
-      {error && <div style={{ color: "red", marginBottom: 10 }}>Error: {error}</div>}
+        <div className="input-row">
+          <input
+            type="text"
+            placeholder="Expense Type"
+            value={utilityType}
+            onChange={(e) => setUtilityType(e.target.value)}
+            className="input-utility-type"
+          />
+          <input
+            type="number"
+            placeholder="Amount"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            className="input-amount"
+          />
+          <input
+            type="date"
+            placeholder="Expense Date"
+            value={billDate}
+            onChange={(e) => setBillDate(e.target.value)}
+            className="input-bill-date"
+          />
+          <input
+            type="text"
+            placeholder="Paid By"
+            value={paidBy}
+            onChange={(e) => setPaidBy(e.target.value)}
+            className="input-paid-by"
+          />
 
-      <div className="input-row">
-        <input
-          className="input-utility-type"
-          type="text"
-          placeholder="Utility Type (Electricity, Gas)"
-          value={utilityType}
-          onChange={(e) => setUtilityType(e.target.value)}
-          disabled={loading}
-        />
-        <input
-          className="input-amount"
-          type="number"
-          placeholder="Amount (₹)"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          min="0"
-          step="0.01"
-          disabled={loading}
-        />
-        <input
-          className="input-bill-date"
-          type="date"
-          value={billDate}
-          onChange={(e) => setBillDate(e.target.value)}
-          disabled={loading}
-        />
-        <input
-          className="input-paid-by"
-          type="text"
-          placeholder="Paid By"
-          value={paidBy}
-          onChange={(e) => setPaidBy(e.target.value)}
-          disabled={loading}
-        />
-        <button className="button-primary" onClick={saveBill} disabled={loading}>
-          {editingId ? "Update Bill" : "Add Bill"}
-        </button>
-      </div>
+          <button onClick={addOrUpdateBill} className="button-primary">
+            {editingBillId ? "Update Expense" : "Add Expense"}
+          </button>
 
-      <div className="main-content">
-        <div className="bills-section">
-          <div className="bills-list-header">
-            <div className="bill-column">Utility</div>
-            <div className="bill-column">Amount (₹)</div>
-            <div className="bill-column">Date</div>
-            <div className="bill-column">Paid By</div>
-            <div className="bill-column-actions">Actions</div>
-          </div>
-
-          {loading && <div>Loading...</div>}
-
-          {!loading && filteredBills.length === 0 && (
-            <div className="no-bills">No bills added yet</div>
+          {editingBillId && (
+            <button onClick={cancelEdit} className="button-secondary">
+              Cancel
+            </button>
           )}
-
-          {!loading &&
-            filteredBills.map(({ id, utilityType, amount, billDate, paidBy }) => (
-              <div className="bills-list-item" key={id}>
-                <div className="bill-column">{utilityType}</div>
-                <div className="bill-column">₹ {amount}</div>
-                <div className="bill-column">{billDate}</div>
-                <div className="bill-column">{paidBy}</div>
-                <div className="bill-column-actions">
-                  <button className="button-secondary" onClick={() => editBill(id)} disabled={loading}>
-                    Edit
-                  </button>
-                  <button className="button-secondary" onClick={() => deleteBill(id)} disabled={loading}>
-                    Delete
-                  </button>
-                </div>
-              </div>
-            ))}
         </div>
 
-        <div className="summary-section">
-          <h2>Summary</h2>
+        <ul className="bills-list">
+          {bills.length === 0 && <li className="no-bills">No expenses found.</li>}
 
-          <label htmlFor="month-filter" className="filter-label">
-            Filter by month:
-          </label>
-          <select
-            id="month-filter"
-            value={filterMonth}
-            onChange={(e) => setFilterMonth(e.target.value)}
-            className="month-filter"
-            disabled={loading}
-          >
-            {months.map(({ value, label }) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </select>
+          {bills.map((bill) => (
+            <li key={bill.id} className="bills-list-item">
+              <div className="bills-list-item-info">
+                <div className="bill-column">{bill.utility_type}</div>
+                <div className="bill-column">₹{bill.amount.toFixed(2)}</div>
+                  <div className="bill-column">
+                    {new Date(bill.bill_date).toLocaleDateString("en-GB")}
+                  </div>
+                <div className="bill-column">{bill.added_by}</div>
+              </div>
+              <div className="bills-list-item-actions">
+                <button
+                  onClick={() => startEditBill(bill)}
+                  className="button-primary"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => deleteBill(bill.id)}
+                  className="button-secondary"
+                >
+                  Delete
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
 
-          <div className="summary-info">
-            <p>
-              <strong>Total Amount:</strong> ₹ {summary.total.toFixed(2)}
-            </p>
+      {/* New Analytics Container */}
+      <div className="analytics-container">
+        <h2>Expense Summary</h2>
 
-            <h3>Spend by Person:</h3>
-            {Object.keys(summary.byPerson).length === 0 ? (
-              <p>No data for selected month.</p>
-            ) : (
-              <ul>
-                {Object.entries(summary.byPerson).map(([person, amt]) => (
-                  <li key={person}>
-                    {person}: ₹ {amt.toFixed(2)}
-                  </li>
-                ))}
-              </ul>
-            )}
+        <label htmlFor="monthPicker">Select Month:</label>
+        <input
+          id="monthPicker"
+          type="month"
+          value={selectedMonth}
+          onChange={(e) => setSelectedMonth(e.target.value)}
+          className="month-picker"
+        />
+
+        <div className="analytics-summary">
+          <h3>Total Expense: ₹{totalExpense.toFixed(2)}</h3>
+
+          <div className="analytics-section">
+            <h4>Expense by Person:</h4>
+            <ul>
+              {Object.entries(expenseByPerson).length === 0 && <li>No data</li>}
+              {Object.entries(expenseByPerson).map(([person, amount]) => (
+                <li key={person}>
+                  {person}: ₹{amount.toFixed(2)}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="analytics-section">
+            <h4>Expense by Category:</h4>
+            <ul>
+              {Object.entries(expenseByCategory).length === 0 && <li>No data</li>}
+              {Object.entries(expenseByCategory).map(([category, amount]) => (
+                <li key={category}>
+                  {category}: ₹{amount.toFixed(2)}
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
