@@ -32,7 +32,9 @@ export default function App() {
 
   // Fetch bills from backend on mount
   useEffect(() => {
+    console.log("useEffect called");  // Debug: confirm useEffect runs
     async function fetchBills() {
+      console.log("fetch bills called");  // Debug: confirm useEffect runs
       setLoading(true);
       setError("");
       try {
