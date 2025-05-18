@@ -39,7 +39,6 @@ export default function App() {
   const [paidBy, setPaidBy] = useState("");
   const [editingBillId, setEditingBillId] = useState(null);
 
-  // Fetch bills function
   async function fetchBills() {
     try {
       const res = await axios.get(
@@ -55,7 +54,6 @@ export default function App() {
     fetchBills();
   }, [homeId]);
 
-  // Reset inputs
   const resetInputs = () => {
     setUtilityType("");
     setAmount("");
@@ -64,13 +62,11 @@ export default function App() {
     setEditingBillId(null);
   };
 
-  // Add or Update bill
   const addOrUpdateBill = async () => {
     if (!utilityType || !amount || !billDate || !paidBy) return alert("All fields are required");
 
     try {
       if (editingBillId) {
-        // update bill
         await axios.put(
           `https://collab-itinerary-app.onrender.com/api/bills/${editingBillId}`,
           {
@@ -81,7 +77,6 @@ export default function App() {
           }
         );
       } else {
-        // add new bill
         await axios.post("https://collab-itinerary-app.onrender.com/api/bills", {
           home_id: homeId,
           utility_type: utilityType,
@@ -97,7 +92,6 @@ export default function App() {
     }
   };
 
-  // Delete bill
   const deleteBill = async (id) => {
     if (!window.confirm("Are you sure you want to delete this bill?")) return;
 
@@ -110,7 +104,6 @@ export default function App() {
     }
   };
 
-  // Start editing a bill
   const startEditBill = (bill) => {
     setEditingBillId(bill.id);
     setUtilityType(bill.utility_type);
@@ -119,7 +112,6 @@ export default function App() {
     setPaidBy(bill.added_by);
   };
 
-  // Cancel edit
   const cancelEdit = () => {
     resetInputs();
   };
@@ -130,7 +122,7 @@ export default function App() {
         maxWidth: "900px",
         margin: "2rem auto",
         padding: "2rem",
-        backgroundColor: "#f0f8ff", // Salesforce light blue
+        backgroundColor: "#f0f8ff",
         borderRadius: "12px",
         boxShadow: "0 4px 10px rgb(0 0 0 / 0.1)",
         minHeight: "600px",
@@ -198,17 +190,28 @@ export default function App() {
         )}
       </div>
 
-      <ul
-        style={{
-          listStyle: "none",
-          padding: 0,
-          margin: 0,
-          maxHeight: "350px",
-          overflowY: "auto",
-        }}
-      >
+      <div style={{ overflowX: "auto" }}>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr 1fr 1fr 180px",
+            gap: "0.5rem",
+            padding: "0.5rem 0",
+            fontWeight: "bold",
+            borderBottom: "2px solid #ccc",
+            backgroundColor: "#f7f9fb",
+            textAlign: "left",
+          }}
+        >
+          <div>Utility Type</div>
+          <div>Amount</div>
+          <div>Bill Date</div>
+          <div>Paid By</div>
+          <div>Actions</div>
+        </div>
+
         {bills.length === 0 && (
-          <li
+          <div
             style={{
               textAlign: "center",
               padding: "1rem",
@@ -217,60 +220,42 @@ export default function App() {
             }}
           >
             No bills found.
-          </li>
+          </div>
         )}
 
         {bills.map((bill) => (
-          <li
+          <div
             key={bill.id}
             style={{
-              display: "flex",
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr 1fr 1fr 180px",
+              gap: "0.5rem",
               alignItems: "center",
-              justifyContent: "space-between",
-              borderBottom: "1px solid #ddd",
               padding: "0.5rem 0",
-              gap: "0.75rem",
-              flexWrap: "wrap",
+              borderBottom: "1px solid #eee",
             }}
           >
-            <div
-              style={{
-                flex: "1 1 60%",
-                minWidth: "220px",
-                fontSize: "1rem",
-                fontWeight: "600",
-                color: "#333",
-              }}
-            >
-              {bill.utility_type} - ₹{bill.amount.toFixed(2)} -{" "}
-              {new Date(bill.bill_date).toLocaleDateString()} - Paid by: {bill.added_by}
-            </div>
-            <div
-              style={{
-                flex: "1 1 35%",
-                minWidth: "200px",
-                display: "flex",
-                gap: "0.5rem",
-                justifyContent: "flex-end",
-                flexWrap: "wrap",
-              }}
-            >
+            <div>{bill.utility_type}</div>
+            <div>₹{bill.amount.toFixed(2)}</div>
+            <div>{new Date(bill.bill_date).toLocaleDateString()}</div>
+            <div>{bill.added_by}</div>
+            <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
               <button
                 onClick={() => startEditBill(bill)}
-                style={{ ...buttonStylePrimary, flex: "1 1 90px" }}
+                style={{ ...buttonStylePrimary, flex: "1 1 80px" }}
               >
                 Edit
               </button>
               <button
                 onClick={() => deleteBill(bill.id)}
-                style={{ ...buttonStyleSecondary, flex: "1 1 90px" }}
+                style={{ ...buttonStyleSecondary, flex: "1 1 80px" }}
               >
                 Delete
               </button>
             </div>
-          </li>
+          </div>
         ))}
-      </ul>
+      </div>
     </div>
   );
 }
