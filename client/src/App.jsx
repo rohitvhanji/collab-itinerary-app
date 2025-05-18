@@ -37,14 +37,16 @@ export default function App() {
   const [paidBy, setPaidBy] = useState("");
   const [editingBillId, setEditingBillId] = useState(null);
 
+  const proxyUrl = "https://cors-anywhere.herokuapp.com/";
+  const apiBase = "https://collab-itinerary-app.onrender.com/api/bills";
+
   useEffect(() => {
     fetchBills();
   }, []);
 
   async function fetchBills() {
     try {
-      const res = await axios.get(`https://collab-itinerary-app.onrender.com/api/bills/${homeId}`);
-      console.log("Fetched bills:", res.data);
+      const res = await axios.get(proxyUrl + apiBase + `/${homeId}`);
       setBills(res.data);
     } catch (error) {
       console.error("Error fetching bills:", error);
@@ -60,16 +62,13 @@ export default function App() {
   };
 
   const addOrUpdateBill = async () => {
-    console.log("Adding or updating bill:", { utilityType, amount, billDate, paidBy });
-    if (!utilityType || !amount || !billDate || !paidBy) {
-      alert("All fields are required");
-      return;
-    }
+    if (!utilityType || !amount || !billDate || !paidBy)
+      return alert("All fields are required");
 
     try {
       if (editingBillId) {
         await axios.put(
-          `https://collab-itinerary-app.onrender.com/api/bills/${editingBillId}`,
+          proxyUrl + apiBase + `/${editingBillId}`,
           {
             utility_type: utilityType,
             amount: parseFloat(amount),
@@ -78,7 +77,7 @@ export default function App() {
           }
         );
       } else {
-        await axios.post(`https://collab-itinerary-app.onrender.com/api/bills`, {
+        await axios.post(proxyUrl + apiBase, {
           home_id: homeId,
           utility_type: utilityType,
           amount: parseFloat(amount),
@@ -90,26 +89,24 @@ export default function App() {
       resetInputs();
     } catch (error) {
       console.error("Error saving bill:", error);
-      alert("Failed to save bill. See console for details.");
     }
   };
 
   const deleteBill = async (id) => {
     if (!window.confirm("Are you sure you want to delete this expense?")) return;
     try {
-      await axios.delete(`https://collab-itinerary-app.onrender.com/api/bills/${id}`);
+      await axios.delete(proxyUrl + apiBase + `/${id}`);
       if (editingBillId === id) resetInputs();
       await fetchBills();
     } catch (error) {
       console.error("Error deleting expense:", error);
-      alert("Failed to delete bill. See console for details.");
     }
   };
 
   const startEditBill = (bill) => {
     setEditingBillId(bill.id);
     setUtilityType(bill.utility_type);
-    setAmount(bill.amount.toString()); // Convert to string for input
+    setAmount(bill.amount);
     setBillDate(bill.bill_date);
     setPaidBy(bill.added_by);
   };
@@ -117,8 +114,6 @@ export default function App() {
   const cancelEdit = () => {
     resetInputs();
   };
-
-  console.log("Bills in state:", bills);
 
   // Analytics data
   const expenseByPerson = bills.reduce((acc, bill) => {
@@ -198,11 +193,6 @@ export default function App() {
           <div>Paid By</div>
           <div>Actions</div>
         </div>
-        {bills.length === 0 && (
-          <div style={{ padding: "1rem", textAlign: "center", color: "#777" }}>
-            No bills to show
-          </div>
-        )}
         {bills.map((bill) => (
           <div
             key={bill.id}
